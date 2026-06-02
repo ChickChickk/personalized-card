@@ -257,6 +257,27 @@ body {
   margin: 2rem 0;
   line-height: 1.7;
 }
+
+.letter-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.share-note {
+  margin: 0;
+  color: rgba(92, 58, 16, 0.72);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.share-note.is-copied {
+  color: #8a5a1f;
+  font-weight: 600;
+}
+
 .signature-name {
   font-family: var(--font-display);
   font-size: 2.5rem;

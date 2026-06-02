@@ -31,6 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnMagicDraft = document.getElementById("btn-magic-draft");
   const helperDetail = document.getElementById("helper-detail");
   const thumbnailContainer = document.getElementById("preview-game-thumbnail");
+  const btnCopyLink = document.getElementById("btn-copy-link");
+  const shareNote = document.querySelector(".share-note");
 
   function encodeCardData(cardData) {
     return btoa(encodeURIComponent(JSON.stringify(cardData)));
@@ -265,6 +267,26 @@ document.addEventListener("DOMContentLoaded", () => {
     state.activeLoopId = null;
   }
 
+  async function copyShareLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+
+      if (shareNote) {
+        shareNote.textContent =
+          "Link copied ✓ Anyone with this link can open the card.";
+        shareNote.classList.add("is-copied");
+      }
+    } catch (error) {
+      console.error("Failed to copy link:", error);
+
+      if (shareNote) {
+        shareNote.textContent =
+          "Copy failed. You can manually copy the URL from the address bar.";
+        shareNote.classList.remove("is-copied");
+      }
+    }
+  }
+
   inputTo.addEventListener("input", syncPreview);
   inputFrom.addEventListener("input", syncPreview);
   inputMessage.addEventListener("input", syncPreview);
@@ -310,6 +332,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("btn-letter-back").addEventListener("click", () => {
+    if (btnCopyLink) {
+      btnCopyLink.addEventListener("click", copyShareLink);
+    }
     if (state.mode === "card") {
       viewLetter.classList.add("hidden");
       viewGameplay.classList.remove("hidden");
