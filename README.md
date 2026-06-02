@@ -1,2 +1,2 @@
-# personalized-card
+# Personalized Card
 Write for your loved ones.
