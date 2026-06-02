@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unlockable Card Platform</title>
+    <link
+      href="https://api.fontshare.com/v2/css?f[]=stardom@400&f[]=plus-jakarta-sans@400,500,600,700,800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <main id="builder-view" class="workspace-layout">
+        <section class="creation-studio">
+          <header class="hero-section">
+            <span class="eyebrow">Generation Studio</span>
+            <h1>Special for your loved ones💌</h1>
+            <p>
+              Write the note, choose one tiny game, and turn it into a little
+              surprise.
+            </p>
+          </header>
+
+          <form id="creation-form" class="composer-canvas">
+            <div class="envelope-coordinates">
+              <div class="inline-field">
+                <label for="input-to">To</label>
+                <input
+                  type="text"
+                  id="input-to"
+                  placeholder="Someone Special"
+                  required
+                />
+              </div>
+              <div class="inline-field">
+                <label for="input-from">From</label>
+                <input
+                  type="text"
+                  id="input-from"
+                  placeholder="Your Name"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="composer-core">
+              <textarea
+                id="input-message"
+                placeholder="Your letter unfolds here... write something unforgettable."
+                required
+              ></textarea>
+
+              <div class="message-helper-integrated">
+                <div class="helper-trigger-text">Need a starter draft?</div>
+                <div class="helper-controls">
+                  <select id="helper-tone" aria-label="Select tone"></select>
+                  <input
+                    type="text"
+                    id="helper-detail"
+                    placeholder="Add a custom memory or keyword..."
+                  />
+                  <button
+                    type="button"
+                    id="btn-magic-draft"
+                    class="btn-secondary"
+                  >
+                    Write me a draft ✨
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="game-picker-section">
+              <div class="section-meta">
+                <h2>Choose a game mode</h2>
+                <p>Pick the little challenge before the message unlocks.</p>
+              </div>
+              <div class="game-cards-track" id="game-cards-container"></div>
+            </div>
+
+            <div class="action-hub">
+              <button type="submit" id="btn-create-card" class="btn-primary">
+                Create card ✨
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section class="preview-studio">
+          <div class="preview-sticky-wrap">
+            <div id="preview-game-thumbnail" class="preview-thumbnail"></div>
+            <div class="preview-header">
+              <span class="preview-label">Live Preview</span>
+              <span id="preview-game-pill" class="game-pill">Balloons</span>
+            </div>
+            <div class="card-preview-envelope">
+              <div class="preview-card-body">
+                <div class="preview-meta">
+                  <span>To: <strong id="prev-to">Someone Special</strong></span>
+                  <span>From: <strong id="prev-from">Your Name</strong></span>
+                </div>
+                <div class="preview-divider"></div>
+                <p id="prev-message" class="preview-text-placeholder">
+                  Your message will appear here as you write.
+                </p>
+              </div>
+              <div class="preview-footer-lock">
+                <span>🔒</span> Unlocks after:
+                <span id="prev-lock-mode">Balloons Burst</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <section id="gameplay-view" class="runtime-screen hidden">
+        <div class="runtime-card-panel">
+          <button type="button" id="btn-game-back" class="btn-back">
+            ← Go Back & Edit
+          </button>
+          <header class="runtime-header">
+            <span id="game-icon-display" class="runtime-emoji">🎈</span>
+            <h2 id="game-title-display">Popping Time</h2>
+            <p id="game-desc-display">
+              Clear the challenge to view your message.
+            </p>
+          </header>
+          <div id="game-engine-stage" class="game-stage-container"></div>
+        </div>
+      </section>
+
+      <section id="letter-view" class="runtime-screen hidden">
+        <div class="letter-reveal-canvas">
+          <button type="button" id="btn-letter-back" class="btn-back">
+            ← Build Another Card
+          </button>
+          <div class="letter-letterhead">
+            <p>Dearest <span id="final-to">Someone Special</span>,</p>
+          </div>
+          <div class="letter-body-content">
+            <p id="final-message"></p>
+          </div>
+          <div class="letter-signoff">
+            <p>With love,</p>
+            <p class="signature-name" id="final-from">you</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script src="js/helperSweet.js"></script>
+    <script src="js/helperFunny.js"></script>
+    <script src="js/helperMysterious.js"></script>
+    <script src="js/helperApology.js"></script>
+    <script src="js/helperBirthday.js"></script>
+    <script src="js/helperAnniversary.js"></script>
+    <script src="js/helperRegistry.js"></script>
+
+    <script src="js/gameBalloons.js"></script>
+    <script src="js/gamePuzzle.js"></script>
+    <script src="js/gameCatcher.js"></script>
+    <script src="js/gameSnake.js"></script>
+    <script src="js/gameClicker.js"></script>
+    <script src="js/gameSimon.js"></script>
+    <script src="js/gameRegistry.js"></script>
+
+    <script src="js/main.js"></script>
+  </body>
+</html>
