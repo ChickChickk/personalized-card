@@ -42,11 +42,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return JSON.parse(decodeURIComponent(atob(encodedData)));
   }
 
-  function buildCardUrl(cardData) {
+  function buildCardUrl(cardData, options = {}) {
     const encodedData = encodeCardData(cardData);
     const baseUrl = `${window.location.origin}${window.location.pathname}`;
+    const previewParam = options.preview ? "&preview=1" : "";
 
-    return `${baseUrl}?mode=card&data=${encodedData}`;
+    return `${baseUrl}?mode=card&data=${encodedData}${previewParam}`;
   }
 
   function getCardDataFromUrl() {
@@ -184,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function openCardInNewTab(cardData) {
-    const cardUrl = buildCardUrl(cardData);
+    const cardUrl = buildCardUrl(cardData, { preview: true });
     window.open(cardUrl, "_blank", "noopener,noreferrer");
   }
 
@@ -223,7 +224,13 @@ document.addEventListener("DOMContentLoaded", () => {
     state.message = cardData.message || "";
     state.selectedGame = cardData.selectedGame || "balloons";
 
+    const params = new URLSearchParams(window.location.search);
+    const isCreatorPreview = params.get("preview") === "1";
+    const isSharedLink = !isCreatorPreview;
+
     document.body.classList.add("mode-card");
+    document.body.classList.toggle("mode-shared-link", isSharedLink);
+    document.body.classList.toggle("mode-creator-preview", !isSharedLink);
     document.body.classList.remove("mode-builder");
 
     viewBuilder.classList.add("hidden");
@@ -267,17 +274,46 @@ document.addEventListener("DOMContentLoaded", () => {
     state.activeLoopId = null;
   }
 
+  function getShareUrl() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("preview");
+    return url.toString();
+  }
+
   async function copyShareLink() {
+    const shareUrl = getShareUrl();
+
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const tempInput = document.createElement("textarea");
+        tempInput.value = shareUrl;
+        tempInput.setAttribute("readonly", "");
+        tempInput.style.position = "fixed";
+        tempInput.style.left = "-9999px";
+
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+      }
 
       if (shareNote) {
         shareNote.textContent =
           "Link copied ✓ Anyone with this link can open the card.";
         shareNote.classList.add("is-copied");
       }
+
+      if (btnCopyLink) {
+        btnCopyLink.textContent = "Copied ✓";
+
+        setTimeout(() => {
+          btnCopyLink.textContent = "Copy share link 🔗";
+        }, 1600);
+      }
     } catch (error) {
-      console.error("Failed to copy link:", error);
+      console.error("Failed to copy share link:", error);
 
       if (shareNote) {
         shareNote.textContent =
@@ -286,7 +322,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }
-
   inputTo.addEventListener("input", syncPreview);
   inputFrom.addEventListener("input", syncPreview);
   inputMessage.addEventListener("input", syncPreview);
@@ -319,6 +354,10 @@ document.addEventListener("DOMContentLoaded", () => {
     openCardInNewTab(cardData);
   });
 
+  if (btnCopyLink) {
+    btnCopyLink.addEventListener("click", copyShareLink);
+  }
+
   document.getElementById("btn-game-back").addEventListener("click", () => {
     stopActiveGame();
 
@@ -332,9 +371,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("btn-letter-back").addEventListener("click", () => {
-    if (btnCopyLink) {
-      btnCopyLink.addEventListener("click", copyShareLink);
-    }
     if (state.mode === "card") {
       viewLetter.classList.add("hidden");
       viewGameplay.classList.remove("hidden");
