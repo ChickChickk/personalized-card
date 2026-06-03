@@ -288,8 +288,22 @@ body {
   font-size: 2.5rem;
   color: var(--accent-orange);
 }
+
 .hidden {
   display: none !important;
+}
+
+.site-footer {
+  position: relative;
+  z-index: 1;
+  padding: 24px 16px 32px;
+  text-align: center;
+}
+
+.copyright {
+  margin: 0;
+  color: rgba(92, 58, 16, 0.55);
+  font-size: 0.82rem;
 }
 
 .mode-shared-link #btn-game-back,
