@@ -371,18 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("btn-letter-back").addEventListener("click", () => {
-    if (state.mode === "card") {
-      viewLetter.classList.add("hidden");
-      viewGameplay.classList.remove("hidden");
-      startSelectedGame();
-      return;
-    }
-
-    viewLetter.classList.add("hidden");
-    viewBuilder.classList.remove("hidden");
-
-    formCreation.reset();
-    syncPreview();
+    window.close();
   });
 
   function initApp() {
