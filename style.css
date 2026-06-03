@@ -266,6 +266,11 @@ body {
   margin-top: 24px;
 }
 
+.preserve-lines {
+  white-space: pre-line;
+  overflow-wrap: break-word;
+}
+
 .share-note {
   margin: 0;
   color: rgba(92, 58, 16, 0.72);
@@ -285,4 +290,11 @@ body {
 }
 .hidden {
   display: none !important;
+}
+
+.mode-shared-link #btn-game-back,
+.mode-shared-link #btn-letter-back,
+.mode-shared-link #btn-copy-link,
+.mode-shared-link .share-note {
+  display: none;
 }
