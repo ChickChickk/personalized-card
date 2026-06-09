@@ -8,7 +8,7 @@
   --panel-bg: rgba(255, 255, 255, 0.45);
   --font-display: "Stardom", Georgia, serif;
   --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
-  --desktop-scale: 1;
+  --desktop-scale: 0.75;
 }
 * {
   box-sizing: border-box;
@@ -41,7 +41,7 @@ body {
 
 @media (min-width: 1024px) {
   :root {
-    --desktop-scale: 1;
+    --desktop-scale: 0.75;
   }
 }
 
@@ -360,7 +360,9 @@ main {
   cursor: pointer;
   color: var(--text-muted-brown);
   backdrop-filter: blur(10px);
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
   line-height: 1;
 }
 
@@ -418,7 +420,7 @@ main {
 
 .signature-name {
   font-family: var(--font-display);
-  font-size: 2.5rem;
+  font-size: 1.25rem;
   color: var(--accent-orange);
 }
 
@@ -437,8 +439,14 @@ main {
 }
 
 @keyframes formErrorFadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hidden {
