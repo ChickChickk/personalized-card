@@ -36,11 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const formErrors = document.getElementById("form-errors");
 
   function encodeCardData(cardData) {
-    return btoa(encodeURIComponent(JSON.stringify(cardData)));
+    return LZString.compressToEncodedURIComponent(JSON.stringify(cardData));
   }
 
   function decodeCardData(encodedData) {
-    return JSON.parse(decodeURIComponent(atob(encodedData)));
+    return JSON.parse(LZString.decompressFromEncodedURIComponent(encodedData));
   }
 
   function buildCardUrl(cardData, options = {}) {
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const baseUrl = `${window.location.origin}${window.location.pathname}`;
     const previewParam = options.preview ? "&preview=1" : "";
 
-    return `${baseUrl}?mode=card&data=${encodeURIComponent(encodedData)}${previewParam}`;
+    return `${baseUrl}?mode=card&data=${encodedData}${previewParam}`;
   }
 
   function getCardDataFromUrl() {
