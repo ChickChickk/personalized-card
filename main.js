@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const baseUrl = `${window.location.origin}${window.location.pathname}`;
     const previewParam = options.preview ? "&preview=1" : "";
 
-    return `${baseUrl}?mode=card&data=${encodedData}${previewParam}`;
+    return `${baseUrl}?mode=card&data=${encodeURIComponent(encodedData)}${previewParam}`;
   }
 
   function getCardDataFromUrl() {
