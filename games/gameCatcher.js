@@ -18,36 +18,89 @@ const GameCatcher = {
   </svg>`,
 
   start: function (stage, onComplete) {
-    stage.innerHTML = `<canvas id="cCvs" width="400" height="300" style="background:#2c3e50; display:block;"></canvas>`;
-    const canvas = document.getElementById("cCvs"),
-      ctx = canvas.getContext("2d");
-    let score = 0,
-      bx = 170,
-      stars = [],
-      loopId;
-    canvas.addEventListener("mousemove", (e) => {
-      bx = e.clientX - canvas.getBoundingClientRect().left - 30;
-    });
-    function tick() {
-      ctx.clearRect(0, 0, 400, 300);
-      ctx.fillStyle = "#e67e22";
-      ctx.fillRect(bx, 270, 60, 15);
-      if (Math.random() < 0.03 && stars.length < 3)
-        stars.push({ x: Math.random() * 380 + 10, y: 0 });
-      stars.forEach((s, i) => {
-        s.y += 2;
-        ctx.fillStyle = "#f1c40f";
-        ctx.fillText("⭐", s.x, s.y);
-        if (s.y >= 270 && s.x >= bx && s.x <= bx + 60) {
-          stars.splice(i, 1);
-          score++;
-          if (score >= 5) onComplete();
-        } else if (s.y > 300) stars.splice(i, 1);
-      });
-      ctx.fillStyle = "#fff";
-      ctx.fillText(`Stars: ${score}/5`, 10, 20);
-      if (score < 5) loopId = requestAnimationFrame(tick);
+    const W = Math.min(400, (stage.clientWidth || 400) - 8);
+    const H = 280;
+    const BASKET_W = 64;
+    const BASKET_H = 14;
+
+    stage.innerHTML = `<canvas id="cCvs" width="${W}" height="${H}"
+      style="background:#fef9f4; display:block; border-radius:8px; max-width:100%; touch-action:none;"></canvas>`;
+
+    const canvas = document.getElementById("cCvs");
+    const ctx = canvas.getContext("2d");
+
+    let score = 0;
+    let bx = W / 2 - BASKET_W / 2;
+    let stars = [];
+    let loopId;
+    let done = false;
+
+    function clampBasket(x) {
+      return Math.max(0, Math.min(W - BASKET_W, x));
     }
+
+    function toCanvasX(clientX) {
+      const rect = canvas.getBoundingClientRect();
+      return (clientX - rect.left) * (W / rect.width);
+    }
+
+    canvas.addEventListener("mousemove", (e) => {
+      bx = clampBasket(toCanvasX(e.clientX) - BASKET_W / 2);
+    });
+
+    canvas.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+      bx = clampBasket(toCanvasX(e.touches[0].clientX) - BASKET_W / 2);
+    }, { passive: false });
+
+    function tick() {
+      ctx.clearRect(0, 0, W, H);
+
+      // Basket
+      ctx.fillStyle = "#e76f51";
+      ctx.fillRect(bx, H - BASKET_H - 10, BASKET_W, BASKET_H);
+
+      // Spawn star
+      if (Math.random() < 0.025 && stars.length < 4) {
+        stars.push({
+          x: Math.random() * (W - 24) + 12,
+          y: 0,
+          speed: 1.8 + Math.random() * 1.2,
+        });
+      }
+
+      const basketTop = H - BASKET_H - 10;
+
+      stars = stars.filter((s) => {
+        s.y += s.speed;
+        ctx.font = "20px sans-serif";
+        ctx.fillText("⭐", s.x - 10, s.y);
+
+        const caught =
+          s.y >= basketTop &&
+          s.y <= basketTop + BASKET_H + s.speed + 4 &&
+          s.x >= bx &&
+          s.x <= bx + BASKET_W;
+
+        if (caught) {
+          score++;
+          if (score >= 5 && !done) {
+            done = true;
+            cancelAnimationFrame(loopId);
+            onComplete();
+          }
+          return false;
+        }
+        return s.y <= H;
+      });
+
+      ctx.fillStyle = "#3d342e";
+      ctx.font = "14px sans-serif";
+      ctx.fillText(`Stars: ${score} / 5`, 10, 22);
+
+      if (!done) loopId = requestAnimationFrame(tick);
+    }
+
     tick();
     return loopId;
   },

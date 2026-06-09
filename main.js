@@ -371,6 +371,23 @@ document.addEventListener("DOMContentLoaded", () => {
     btnCopyLink.addEventListener("click", copyShareLink);
   }
 
+  const FONT_SIZES = ["0.9rem", "1.1rem", "1.3rem", "1.6rem"];
+  let fontSizeIdx = 1;
+
+  function applyLetterFontSize() {
+    document.getElementById("final-message").style.fontSize = FONT_SIZES[fontSizeIdx];
+  }
+
+  document.getElementById("btn-font-down").addEventListener("click", () => {
+    fontSizeIdx = Math.max(0, fontSizeIdx - 1);
+    applyLetterFontSize();
+  });
+
+  document.getElementById("btn-font-up").addEventListener("click", () => {
+    fontSizeIdx = Math.min(FONT_SIZES.length - 1, fontSizeIdx + 1);
+    applyLetterFontSize();
+  });
+
   document.getElementById("btn-game-back").addEventListener("click", () => {
     stopActiveGame();
 

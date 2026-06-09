@@ -23,50 +23,98 @@ const GameBalloons = {
     </svg>`,
 
   start: function (stage, onComplete) {
-    stage.innerHTML = `<canvas id="bCvs" width="400" height="300" style="background:#eef7f9; display:block; cursor:pointer;"></canvas>`;
-    const canvas = document.getElementById("bCvs"),
-      ctx = canvas.getContext("2d");
-    let score = 0,
-      items = [],
-      loopId;
-    class Item {
+    const W = Math.min(400, (stage.clientWidth || 400) - 8);
+    const H = 280;
+    const COLORS = ["#e76f51", "#f4a261", "#e9c46a", "#2a9d8f"];
+
+    stage.innerHTML = `<canvas id="bCvs" width="${W}" height="${H}"
+      style="background:#fef9f4; display:block; cursor:pointer; border-radius:8px; max-width:100%;"></canvas>`;
+
+    const canvas = document.getElementById("bCvs");
+    const ctx = canvas.getContext("2d");
+
+    let score = 0;
+    let items = [];
+    let loopId;
+    let done = false;
+
+    class Balloon {
       constructor() {
-        this.x = Math.random() * 360 + 20;
-        this.y = 320;
-        this.r = 18;
-        this.s = Math.random() * 1 + 1;
+        this.x = Math.random() * (W - 40) + 20;
+        this.y = H + 20;
+        this.r = 16 + Math.random() * 8;
+        this.speed = 0.8 + Math.random() * 1.2;
+        this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
       }
       draw() {
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-        ctx.fillStyle = "#e76f51";
+        ctx.ellipse(this.x, this.y, this.r * 0.85, this.r, 0, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
         ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y + this.r);
+        ctx.lineTo(this.x, this.y + this.r + 18);
+        ctx.strokeStyle = "rgba(0,0,0,0.2)";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
       }
     }
+
     function tick() {
-      ctx.clearRect(0, 0, 400, 300);
-      if (Math.random() < 0.03 && items.length < 4) items.push(new Item());
-      items.forEach((it, i) => {
-        it.y -= it.s;
-        it.draw();
-        if (it.y < -20) items.splice(i, 1);
+      ctx.clearRect(0, 0, W, H);
+
+      if (Math.random() < 0.025 && items.length < 5) {
+        items.push(new Balloon());
+      }
+
+      // filter instead of splice-in-forEach — avoids skipping items
+      items = items.filter((b) => {
+        b.y -= b.speed;
+        b.draw();
+        return b.y > -40;
       });
+
       ctx.fillStyle = "#3d342e";
-      ctx.fillText(`Pops: ${score}/5`, 10, 20);
-      if (score < 5) loopId = requestAnimationFrame(tick);
+      ctx.font = "14px sans-serif";
+      ctx.fillText(`Pops: ${score} / 5`, 10, 22);
+
+      if (!done) loopId = requestAnimationFrame(tick);
     }
-    canvas.addEventListener("mousedown", (e) => {
-      const rect = canvas.getBoundingClientRect(),
-        mx = e.clientX - rect.left,
-        my = e.clientY - rect.top;
-      items.forEach((it, i) => {
-        if (Math.hypot(it.x - mx, it.y - my) < it.r + 5) {
-          items.splice(i, 1);
+
+    function getCanvasPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = W / rect.width;
+      const scaleY = H / rect.height;
+      const src = e.touches ? e.touches[0] : e;
+      return {
+        x: (src.clientX - rect.left) * scaleX,
+        y: (src.clientY - rect.top) * scaleY,
+      };
+    }
+
+    function tryPop(e) {
+      e.preventDefault();
+      if (done) return;
+      const { x, y } = getCanvasPos(e);
+      let popped = false;
+      items = items.filter((b) => {
+        if (!popped && Math.hypot(b.x - x, b.y - y) < b.r + 8) {
+          popped = true;
           score++;
-          if (score >= 5) onComplete();
+          if (score >= 5) {
+            done = true;
+            cancelAnimationFrame(loopId);
+            onComplete();
+          }
+          return false;
         }
+        return true;
       });
-    });
+    }
+
+    canvas.addEventListener("mousedown", tryPop);
+    canvas.addEventListener("touchstart", tryPop, { passive: false });
+
     tick();
     return loopId;
   },
