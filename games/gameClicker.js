@@ -16,22 +16,69 @@ const GameClicker = {
   </svg>`,
 
   start: function (stage, onComplete) {
+    const TOTAL = 10;
     let count = 0;
+
+    stage.style.position = "relative";
+    stage.style.width = "100%";
+    stage.style.height = "300px";
+
     stage.innerHTML = `
-            <div style="text-align:center;">
-                <div id="clkC" style="font-size:4rem; cursor:pointer; user-select:none; transition:transform 0.1s;">🍪</div>
-                <div id="clkTxt" style="font-weight:600; margin-top:10px;">Clicks: 0 / 10</div>
-            </div>`;
-    const cookie = document.getElementById("clkC");
-    cookie.addEventListener("mousedown", () => {
+      <p id="clk-counter" style="
+        position:absolute; top:12px; left:50%; transform:translateX(-50%);
+        font-size:0.88rem; font-weight:600; color:#7a6e65;
+        font-family:var(--font-sans,sans-serif); white-space:nowrap; margin:0;">
+        0 / ${TOTAL}
+      </p>
+      <div id="clk-cookie" style="
+        position:absolute; cursor:pointer; user-select:none; line-height:1;
+        transition:font-size 0.15s ease, transform 0.1s ease; font-size:72px;">
+        🍪
+      </div>
+    `;
+
+    const cookie = document.getElementById("clk-cookie");
+    const counter = document.getElementById("clk-counter");
+
+    // 72px → 38px as count goes 0 → 9
+    function currentSize() {
+      return Math.round(72 - count * 3.8);
+    }
+
+    function jumpToRandom() {
+      const size = currentSize();
+      const padding = 16;
+      const maxX = Math.max(0, stage.clientWidth - size - padding * 2);
+      const maxY = Math.max(0, stage.clientHeight - size - padding * 2);
+      cookie.style.fontSize = size + "px";
+      cookie.style.left = padding + Math.random() * maxX + "px";
+      cookie.style.top = padding + Math.random() * maxY + "px";
+    }
+
+    // First placement after layout settles
+    setTimeout(jumpToRandom, 50);
+
+    function handleHit(e) {
+      e.preventDefault();
       count++;
-      cookie.style.transform = "scale(0.85)";
-      document.getElementById("clkTxt").textContent = `Clicks: ${count} / 10`;
-      if (count >= 10) onComplete();
-    });
-    cookie.addEventListener("mouseup", () => {
-      cookie.style.transform = "scale(1)";
-    });
+      counter.textContent = `${count} / ${TOTAL}`;
+      cookie.style.transform = "scale(0.78)";
+
+      if (count >= TOTAL) {
+        counter.textContent = `${TOTAL} / ${TOTAL} 🎉`;
+        onComplete();
+        return;
+      }
+
+      setTimeout(() => {
+        cookie.style.transform = "scale(1)";
+        jumpToRandom();
+      }, 110);
+    }
+
+    cookie.addEventListener("mousedown", handleHit);
+    cookie.addEventListener("touchstart", handleHit, { passive: false });
+
     return null;
   },
 };
