@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const thumbnailContainer = document.getElementById("preview-game-thumbnail");
   const btnCopyLink = document.getElementById("btn-copy-link");
   const shareNote = document.querySelector(".share-note");
+  const formErrors = document.getElementById("form-errors");
 
   function encodeCardData(cardData) {
     return btoa(encodeURIComponent(JSON.stringify(cardData)));
@@ -322,9 +323,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }
-  inputTo.addEventListener("input", syncPreview);
-  inputFrom.addEventListener("input", syncPreview);
-  inputMessage.addEventListener("input", syncPreview);
+  inputTo.addEventListener("input", () => { syncPreview(); clearFormErrors(); });
+  inputFrom.addEventListener("input", () => { syncPreview(); clearFormErrors(); });
+  inputMessage.addEventListener("input", () => { syncPreview(); clearFormErrors(); });
 
   btnMagicDraft.addEventListener("click", () => {
     const toneKey = helperToneSelect.value;
@@ -340,16 +341,28 @@ document.addEventListener("DOMContentLoaded", () => {
     syncPreview();
   });
 
+  function showFormErrors(errors) {
+    formErrors.innerHTML = errors.map((e) => `<span>${e}</span>`).join("");
+    formErrors.classList.remove("hidden");
+    formErrors.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function clearFormErrors() {
+    formErrors.classList.add("hidden");
+    formErrors.innerHTML = "";
+  }
+
   formCreation.addEventListener("submit", (event) => {
     event.preventDefault();
 
     const errors = validateCardData();
 
     if (errors.length > 0) {
-      alert(errors.join("\n"));
+      showFormErrors(errors);
       return;
     }
 
+    clearFormErrors();
     const cardData = createCardDataFromBuilder();
     openCardInNewTab(cardData);
   });
