@@ -373,7 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
       confettiPieces.forEach((p) => p.remove());
 
       const cardUrl = buildCardUrl(code, { preview: true });
-      window.open(cardUrl, "_blank", "noopener,noreferrer");
+      window.location.href = cardUrl;
     } catch {
       clearInterval(msgInterval);
       confettiPieces.forEach((p) => p.remove());
