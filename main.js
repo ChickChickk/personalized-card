@@ -312,8 +312,44 @@ document.addEventListener("DOMContentLoaded", () => {
     clearFormErrors();
     syncPreview();
 
-    btnCreateCard.textContent = "Creating…";
     btnCreateCard.disabled = true;
+
+    const overlay = document.getElementById("loading-overlay");
+    const loadingMsg = document.getElementById("loading-message");
+
+    const messages = [
+      "Sealing your envelope…",
+      "Preparing the best message for your loved one…",
+      "Sprinkling a little magic on it…",
+      "Almost ready, hang tight…",
+    ];
+    let msgIndex = 0;
+    loadingMsg.textContent = messages[0];
+    overlay.classList.remove("hidden", "fade-out");
+
+    const confettiColors = ["#e76f51", "#f4a26a", "#f7c59f", "#ffffff", "#f4d03f", "#e8a0bf"];
+    const confettiPieces = [];
+    for (let i = 0; i < 40; i++) {
+      const piece = document.createElement("div");
+      piece.className = "confetti-piece";
+      piece.style.cssText = `
+        left: ${Math.random() * 100}%;
+        animation-delay: ${Math.random() * 2}s;
+        animation-duration: ${1.8 + Math.random() * 1.6}s;
+        background: ${confettiColors[Math.floor(Math.random() * confettiColors.length)]};
+        width: ${6 + Math.random() * 6}px;
+        height: ${6 + Math.random() * 6}px;
+        border-radius: ${Math.random() > 0.5 ? "50%" : "2px"};
+        transform: rotate(${Math.random() * 360}deg);
+      `;
+      overlay.appendChild(piece);
+      confettiPieces.push(piece);
+    }
+
+    const msgInterval = setInterval(() => {
+      msgIndex = (msgIndex + 1) % messages.length;
+      loadingMsg.textContent = messages[msgIndex];
+    }, 1800);
 
     try {
       const cardData = {
@@ -326,12 +362,24 @@ document.addEventListener("DOMContentLoaded", () => {
       const code = await saveCard(cardData);
       state.currentCode = code;
 
+      clearInterval(msgInterval);
+      loadingMsg.textContent = "Your card is ready! 🎉";
+
+      await new Promise((r) => setTimeout(r, 600));
+      overlay.classList.add("fade-out");
+      await new Promise((r) => setTimeout(r, 400));
+      overlay.classList.add("hidden");
+      overlay.classList.remove("fade-out");
+      confettiPieces.forEach((p) => p.remove());
+
       const cardUrl = buildCardUrl(code, { preview: true });
       window.open(cardUrl, "_blank", "noopener,noreferrer");
     } catch {
+      clearInterval(msgInterval);
+      confettiPieces.forEach((p) => p.remove());
+      overlay.classList.add("hidden");
       showFormErrors(["Could not save the card. Please try again."]);
     } finally {
-      btnCreateCard.textContent = "Create card ✨";
       btnCreateCard.disabled = false;
     }
   });
