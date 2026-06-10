@@ -8,7 +8,7 @@
   --panel-bg: rgba(255, 255, 255, 0.45);
   --font-display: "Stardom", Georgia, serif;
   --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
-  --desktop-scale: 0.75;
+  --desktop-scale: 0.9;
 }
 * {
   box-sizing: border-box;
