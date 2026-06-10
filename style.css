@@ -343,32 +343,59 @@ main {
 
 .letter-font-controls {
   position: absolute;
-  top: -48px;
+  top: -44px;
   right: 0;
   display: flex;
-  gap: 6px;
-}
-
-.btn-font {
+  align-items: center;
+  gap: 8px;
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid var(--border-warm);
   border-radius: 10px;
-  padding: 0.4rem 0.65rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  font-family: var(--font-sans);
-  cursor: pointer;
-  color: var(--text-muted-brown);
+  padding: 0.35rem 0.75rem;
   backdrop-filter: blur(10px);
-  transition:
-    background 0.2s,
-    color 0.2s;
-  line-height: 1;
 }
 
-.btn-font:hover {
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--text-dark-brown);
+.font-slider-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted-brown);
+  font-family: var(--font-sans);
+  user-select: none;
+}
+
+.font-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 90px;
+  height: 3px;
+  background: rgba(122, 110, 101, 0.25);
+  border-radius: 2px;
+  outline: none;
+  cursor: ew-resize;
+}
+
+.font-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--accent-orange);
+  cursor: ew-resize;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s;
+}
+
+.font-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.font-slider::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--accent-orange);
+  border: none;
+  cursor: ew-resize;
 }
 
 .letter-letterhead,
@@ -391,6 +418,7 @@ main {
   white-space: pre-line;
   overflow-wrap: break-word;
   line-height: 1.85;
+  font-size: 0.9rem;
 }
 
 .letter-actions {
