@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
     data: { to, from, message, selectedGame },
   });
 
-  if (error) return res.status(500).json({ error: "Failed to save card" });
+  if (error) return res.status(500).json({ error: error.message, details: error });
 
   return res.status(201).json({ code });
 };

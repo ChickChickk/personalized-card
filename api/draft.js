@@ -16,14 +16,18 @@ module.exports = async (req, res) => {
 
   const prompt = `Write a short heartfelt message (3-5 sentences) in a ${tone} tone, addressed to "${to || "someone special"}".${detail ? ` Include this detail: "${detail}".` : ""} Write only the message itself, no greeting line, no sign-off.`;
 
-  const completion = await groq.chat.completions.create({
-    model: "llama3-8b-8192",
-    messages: [{ role: "user", content: prompt }],
-    max_tokens: 200,
-  });
+  try {
+    const completion = await groq.chat.completions.create({
+      model: "llama3-8b-8192",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 200,
+    });
 
-  const text = completion.choices[0]?.message?.content?.trim();
-  if (!text) return res.status(500).json({ error: "AI did not return a response" });
+    const text = completion.choices[0]?.message?.content?.trim();
+    if (!text) return res.status(500).json({ error: "AI did not return a response" });
 
-  return res.status(200).json({ message: text });
+    return res.status(200).json({ message: text });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 };
