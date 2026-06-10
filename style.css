@@ -318,30 +318,6 @@ main {
   animation: scrollUnroll 0.95s cubic-bezier(0.2, 0.85, 0.25, 1) both;
 }
 
-.letter-reveal-canvas::before,
-.letter-reveal-canvas::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  width: calc(100% + 42px);
-  max-width: 1040px;
-  height: 20px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #c0843f 18%, #f0b96f 50%, #c0843f 82%);
-  box-shadow:
-    0 8px 18px rgba(92, 58, 16, 0.18),
-    inset 0 2px 4px rgba(255, 255, 255, 0.35);
-  transform: translateX(-50%);
-  z-index: 2;
-}
-
-.letter-reveal-canvas::before {
-  top: -10px;
-}
-
-.letter-reveal-canvas::after {
-  bottom: -10px;
-}
 
 .letter-font-controls {
   position: absolute;
@@ -558,12 +534,6 @@ main {
     width: min(100%, 94vw);
     padding: 44px 22px;
     border-radius: 22px;
-  }
-
-  .letter-reveal-canvas::before,
-  .letter-reveal-canvas::after {
-    width: calc(100% + 24px);
-    height: 16px;
   }
 
   .letter-body-content {
