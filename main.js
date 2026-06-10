@@ -367,6 +367,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const cardUrl = buildCardUrl(code, { preview: true });
       history.pushState(null, "", cardUrl);
+      state.createdInPlace = true;
 
       startCardMode({
         to: state.to,
@@ -430,16 +431,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("btn-game-back").addEventListener("click", () => {
     stopActiveGame();
-    if (state.mode === "card") {
+    if (state.mode === "card" && !state.createdInPlace) {
       window.close();
-      // Fallback if window.close() is blocked by the browser
       setTimeout(() => {
         window.location.href = window.location.origin + window.location.pathname;
       }, 150);
       return;
     }
-    viewGameplay.classList.add("hidden");
-    viewBuilder.classList.remove("hidden");
+    history.pushState(null, "", window.location.origin + window.location.pathname);
+    state.createdInPlace = false;
+    inputTo.value = state.to;
+    inputFrom.value = state.from;
+    inputMessage.value = state.message;
+    startBuilderMode();
   });
 
   document.getElementById("btn-letter-back").addEventListener("click", () => {
