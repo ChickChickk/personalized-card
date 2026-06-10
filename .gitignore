@@ -2,9 +2,17 @@
 .DS_Store
 Thumbs.db
 
+# Environment variables — never commit these
+.env
+.env.local
+.env*.local
+
 # Editor folders
 .vscode/
 .idea/
 
 # Logs
 *.log
+
+# Dependencies
+node_modules/

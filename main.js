@@ -1,6 +1,9 @@
 /**
  * Main Application Pipeline Controller
  */
+
+const API_BASE = "https://personalized-card-steel.vercel.app";
+
 document.addEventListener("DOMContentLoaded", () => {
   const state = {
     to: "",
@@ -9,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedGame: "balloons",
     activeLoopId: null,
     mode: "builder",
+    currentCode: null,
   };
 
   const viewBuilder = document.getElementById("builder-view");
@@ -34,43 +38,66 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCopyLink = document.getElementById("btn-copy-link");
   const shareNote = document.querySelector(".share-note");
   const formErrors = document.getElementById("form-errors");
+  const btnCreateCard = document.getElementById("btn-create-card");
 
-  function encodeCardData(cardData) {
-    return LZString.compressToEncodedURIComponent(JSON.stringify(cardData));
+  // ── API helpers ──────────────────────────────────────────────
+
+  async function saveCard(cardData) {
+    const res = await fetch(`${API_BASE}/api/cards`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(cardData),
+    });
+    if (!res.ok) throw new Error("Failed to save card");
+    const { code } = await res.json();
+    return code;
   }
 
-  function decodeCardData(encodedData) {
-    return JSON.parse(LZString.decompressFromEncodedURIComponent(encodedData));
+  async function loadCard(code) {
+    const res = await fetch(`${API_BASE}/api/cards/${code}`);
+    if (!res.ok) return null;
+    return res.json();
   }
 
-  function buildCardUrl(cardData, options = {}) {
-    const encodedData = encodeCardData(cardData);
+  async function generateDraft(to, tone, detail) {
+    const res = await fetch(`${API_BASE}/api/draft`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ to, tone, detail }),
+    });
+    if (!res.ok) throw new Error("Draft generation failed");
+    const { message } = await res.json();
+    return message;
+  }
+
+  // ── URL helpers ──────────────────────────────────────────────
+
+  function buildCardUrl(code, options = {}) {
     const baseUrl = `${window.location.origin}${window.location.pathname}`;
     const previewParam = options.preview ? "&preview=1" : "";
-
-    return `${baseUrl}?mode=card&data=${encodedData}${previewParam}`;
+    return `${baseUrl}?c=${code}${previewParam}`;
   }
 
-  function getCardDataFromUrl() {
+  async function getCardDataFromUrl() {
     const params = new URLSearchParams(window.location.search);
-    const mode = params.get("mode");
-    const encodedData = params.get("data");
-
-    if (mode !== "card" || !encodedData) {
-      return null;
-    }
-
+    const code = params.get("c");
+    if (!code) return null;
     try {
-      return decodeCardData(encodedData);
+      return await loadCard(code);
     } catch (error) {
-      console.error("Failed to decode card data:", error);
+      console.error("Failed to load card:", error);
       return null;
     }
   }
+
+  function getShareUrl() {
+    return buildCardUrl(state.currentCode);
+  }
+
+  // ── Preview ──────────────────────────────────────────────────
 
   function renderGameThumbnail(gameId) {
     const game = GAME_REGISTRY[gameId];
-
     if (game && game.thumbnail && thumbnailContainer) {
       thumbnailContainer.innerHTML = game.thumbnail();
     }
@@ -78,9 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initTones() {
     if (!helperToneSelect) return;
-
     helperToneSelect.innerHTML = "";
-
     Object.keys(HELPER_REGISTRY).forEach((key) => {
       const option = document.createElement("option");
       option.value = key;
@@ -91,7 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderGames() {
     if (!gameCardsContainer) return;
-
     gameCardsContainer.innerHTML = "";
 
     Object.keys(GAME_REGISTRY).forEach((key) => {
@@ -113,21 +137,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       card.addEventListener("click", () => {
         state.selectedGame = game.id;
-
         document
           .querySelectorAll(".game-mode-card")
-          .forEach((gameCard) => gameCard.classList.remove("is-selected"));
-
+          .forEach((c) => c.classList.remove("is-selected"));
         card.classList.add("is-selected");
-
-        if (previewGamePill) {
-          previewGamePill.textContent = game.title;
-        }
-
-        if (prevLockMode) {
-          prevLockMode.textContent = game.title;
-        }
-
+        if (previewGamePill) previewGamePill.textContent = game.title;
+        if (prevLockMode) prevLockMode.textContent = game.title;
         renderGameThumbnail(game.id);
       });
 
@@ -152,47 +167,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // ── Validation & errors ──────────────────────────────────────
+
   function validateCardData() {
     const errors = [];
-
-    if (!inputTo.value.trim()) {
-      errors.push("Please enter who the card is for.");
-    }
-
-    if (!inputFrom.value.trim()) {
-      errors.push("Please enter who the card is from.");
-    }
-
-    if (!inputMessage.value.trim()) {
-      errors.push("Please write a message or generate a draft first.");
-    }
-
-    if (!state.selectedGame || !GAME_REGISTRY[state.selectedGame]) {
-      errors.push("Please choose one mini game.");
-    }
-
+    if (!inputTo.value.trim()) errors.push("Please enter who the card is for.");
+    if (!inputFrom.value.trim()) errors.push("Please enter who the card is from.");
+    if (!inputMessage.value.trim()) errors.push("Please write a message or generate a draft first.");
+    if (!state.selectedGame || !GAME_REGISTRY[state.selectedGame]) errors.push("Please choose one mini game.");
     return errors;
   }
 
-  function createCardDataFromBuilder() {
-    syncPreview();
-
-    return {
-      to: state.to,
-      from: state.from,
-      message: state.message,
-      selectedGame: state.selectedGame,
-    };
+  function showFormErrors(errors) {
+    formErrors.innerHTML = errors.map((e) => `<span>${e}</span>`).join("");
+    formErrors.classList.remove("hidden");
+    formErrors.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
-  function openCardInNewTab(cardData) {
-    const cardUrl = buildCardUrl(cardData, { preview: true });
-    window.open(cardUrl, "_blank", "noopener,noreferrer");
+  function clearFormErrors() {
+    formErrors.classList.add("hidden");
+    formErrors.innerHTML = "";
   }
+
+  // ── App modes ────────────────────────────────────────────────
 
   function startBuilderMode() {
     state.mode = "builder";
-
     document.body.classList.add("mode-builder");
     document.body.classList.remove("mode-card");
 
@@ -206,15 +206,9 @@ document.addEventListener("DOMContentLoaded", () => {
     renderGameThumbnail(state.selectedGame);
 
     const selectedGame = GAME_REGISTRY[state.selectedGame];
-
     if (selectedGame) {
-      if (previewGamePill) {
-        previewGamePill.textContent = selectedGame.title;
-      }
-
-      if (prevLockMode) {
-        prevLockMode.textContent = selectedGame.title;
-      }
+      if (previewGamePill) previewGamePill.textContent = selectedGame.title;
+      if (prevLockMode) prevLockMode.textContent = selectedGame.title;
     }
   }
 
@@ -243,7 +237,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function startSelectedGame() {
     const game = GAME_REGISTRY[state.selectedGame];
-
     if (!game) {
       console.error(`Game "${state.selectedGame}" does not exist.`);
       return;
@@ -259,7 +252,6 @@ document.addEventListener("DOMContentLoaded", () => {
     state.activeLoopId = game.start(stage, () => {
       viewGameplay.classList.add("hidden");
       viewLetter.classList.remove("hidden");
-
       document.getElementById("final-to").textContent = state.to;
       document.getElementById("final-from").textContent = state.from;
       document.getElementById("final-message").textContent = state.message;
@@ -268,134 +260,122 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function stopActiveGame() {
     if (!state.activeLoopId) return;
-
     cancelAnimationFrame(state.activeLoopId);
     clearInterval(state.activeLoopId);
-
     state.activeLoopId = null;
   }
 
-  function getShareUrl() {
-    const url = new URL(window.location.href);
-    url.searchParams.delete("preview");
-    return url.toString();
-  }
+  // ── Event listeners ──────────────────────────────────────────
 
-  async function copyShareLink() {
-    const shareUrl = getShareUrl();
-
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(shareUrl);
-      } else {
-        const tempInput = document.createElement("textarea");
-        tempInput.value = shareUrl;
-        tempInput.setAttribute("readonly", "");
-        tempInput.style.position = "fixed";
-        tempInput.style.left = "-9999px";
-
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempInput);
-      }
-
-      if (shareNote) {
-        shareNote.textContent =
-          "Link copied ✓ Anyone with this link can open the card.";
-        shareNote.classList.add("is-copied");
-      }
-
-      if (btnCopyLink) {
-        btnCopyLink.textContent = "Copied ✓";
-
-        setTimeout(() => {
-          btnCopyLink.textContent = "Copy share link 🔗";
-        }, 1600);
-      }
-    } catch (error) {
-      console.error("Failed to copy share link:", error);
-
-      if (shareNote) {
-        shareNote.textContent =
-          "Copy failed. You can manually copy the URL from the address bar.";
-        shareNote.classList.remove("is-copied");
-      }
-    }
-  }
   inputTo.addEventListener("input", () => { syncPreview(); clearFormErrors(); });
   inputFrom.addEventListener("input", () => { syncPreview(); clearFormErrors(); });
   inputMessage.addEventListener("input", () => { syncPreview(); clearFormErrors(); });
 
-  btnMagicDraft.addEventListener("click", () => {
+  btnMagicDraft.addEventListener("click", async () => {
     const toneKey = helperToneSelect.value;
-    const targetHelper = HELPER_REGISTRY[toneKey];
+    btnMagicDraft.textContent = "Writing…";
+    btnMagicDraft.disabled = true;
 
-    if (!targetHelper) return;
-
-    inputMessage.value = targetHelper.generate(
-      inputTo.value.trim() || "someone special",
-      helperDetail.value.trim(),
-    );
-
-    syncPreview();
+    try {
+      const text = await generateDraft(
+        inputTo.value.trim() || "someone special",
+        toneKey,
+        helperDetail.value.trim()
+      );
+      inputMessage.value = text;
+      syncPreview();
+    } catch {
+      // Fall back to template helper if API fails
+      const targetHelper = HELPER_REGISTRY[toneKey];
+      if (targetHelper) {
+        inputMessage.value = targetHelper.generate(
+          inputTo.value.trim() || "someone special",
+          helperDetail.value.trim()
+        );
+        syncPreview();
+      }
+    } finally {
+      btnMagicDraft.textContent = "Write me a draft ✨";
+      btnMagicDraft.disabled = false;
+    }
   });
 
-  function showFormErrors(errors) {
-    formErrors.innerHTML = errors.map((e) => `<span>${e}</span>`).join("");
-    formErrors.classList.remove("hidden");
-    formErrors.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }
-
-  function clearFormErrors() {
-    formErrors.classList.add("hidden");
-    formErrors.innerHTML = "";
-  }
-
-  formCreation.addEventListener("submit", (event) => {
+  formCreation.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const errors = validateCardData();
-
     if (errors.length > 0) {
       showFormErrors(errors);
       return;
     }
 
     clearFormErrors();
-    const cardData = createCardDataFromBuilder();
-    openCardInNewTab(cardData);
+    syncPreview();
+
+    btnCreateCard.textContent = "Creating…";
+    btnCreateCard.disabled = true;
+
+    try {
+      const cardData = {
+        to: state.to,
+        from: state.from,
+        message: state.message,
+        selectedGame: state.selectedGame,
+      };
+
+      const code = await saveCard(cardData);
+      state.currentCode = code;
+
+      const cardUrl = buildCardUrl(code, { preview: true });
+      window.open(cardUrl, "_blank", "noopener,noreferrer");
+    } catch {
+      showFormErrors(["Could not save the card. Please try again."]);
+    } finally {
+      btnCreateCard.textContent = "Create card ✨";
+      btnCreateCard.disabled = false;
+    }
   });
 
   if (btnCopyLink) {
-    btnCopyLink.addEventListener("click", copyShareLink);
+    btnCopyLink.addEventListener("click", async () => {
+      const shareUrl = getShareUrl();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(shareUrl);
+        } else {
+          const tempInput = document.createElement("textarea");
+          tempInput.value = shareUrl;
+          tempInput.setAttribute("readonly", "");
+          tempInput.style.cssText = "position:fixed;left:-9999px;";
+          document.body.appendChild(tempInput);
+          tempInput.select();
+          document.execCommand("copy");
+          document.body.removeChild(tempInput);
+        }
+        if (shareNote) {
+          shareNote.textContent = "Link copied ✓ Anyone with this link can open the card.";
+          shareNote.classList.add("is-copied");
+        }
+        if (btnCopyLink) {
+          btnCopyLink.textContent = "Copied ✓";
+          setTimeout(() => { btnCopyLink.textContent = "Copy share link 🔗"; }, 1600);
+        }
+      } catch {
+        if (shareNote) {
+          shareNote.textContent = "Copy failed. You can manually copy the URL from the address bar.";
+          shareNote.classList.remove("is-copied");
+        }
+      }
+    });
   }
 
-  const FONT_SIZES = ["0.9rem", "1.1rem", "1.3rem", "1.6rem"];
-  let fontSizeIdx = 1;
-
-  function applyLetterFontSize() {
-    document.getElementById("final-message").style.fontSize = FONT_SIZES[fontSizeIdx];
-  }
-
-  document.getElementById("btn-font-down").addEventListener("click", () => {
-    fontSizeIdx = Math.max(0, fontSizeIdx - 1);
-    applyLetterFontSize();
-  });
-
-  document.getElementById("btn-font-up").addEventListener("click", () => {
-    fontSizeIdx = Math.min(FONT_SIZES.length - 1, fontSizeIdx + 1);
-    applyLetterFontSize();
+  document.getElementById("font-slider").addEventListener("input", (e) => {
+    document.getElementById("final-message").style.fontSize = e.target.value / 100 + "rem";
   });
 
   document.getElementById("btn-game-back").addEventListener("click", () => {
     stopActiveGame();
-
-    if (state.mode === "card") {
-      window.close();
-      return;
-    }
-
+    if (state.mode === "card") { window.close(); return; }
     viewGameplay.classList.add("hidden");
     viewBuilder.classList.remove("hidden");
   });
@@ -404,14 +384,16 @@ document.addEventListener("DOMContentLoaded", () => {
     window.close();
   });
 
-  function initApp() {
-    const cardData = getCardDataFromUrl();
+  // ── Init ─────────────────────────────────────────────────────
 
+  async function initApp() {
+    const cardData = await getCardDataFromUrl();
     if (cardData) {
+      // Store the code so "Copy share link" works on the letter view
+      state.currentCode = new URLSearchParams(window.location.search).get("c");
       startCardMode(cardData);
       return;
     }
-
     startBuilderMode();
   }
 

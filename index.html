@@ -142,8 +142,10 @@
             ← Build Another Card
           </button>
           <div class="letter-font-controls">
-            <button type="button" id="btn-font-down" class="btn-font">A−</button>
-            <button type="button" id="btn-font-up" class="btn-font">A+</button>
+            <span class="font-slider-label">Aa</span>
+            <input type="range" id="font-slider" class="font-slider"
+              min="80" max="160" step="5" value="90"
+              aria-label="Adjust font size" />
           </div>
           <div class="letter-letterhead">
             <p>Dearest <span id="final-to" class="signature-name">Someone Special</span>,</p>
@@ -185,7 +187,6 @@
     <script src="games/gameSimon.js"></script>
     <script src="games/gameRegistry.js"></script>
 
-    <script src="lz-string.min.js"></script>
     <script src="main.js"></script>
   </body>
 </html>

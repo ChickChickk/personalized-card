@@ -1,0 +1,25 @@
+{
+  "name": "personal-card-builder-redesign",
+  "version": "1.0.0",
+  "description": "Write for your loved ones.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChickChickk/personalized-card.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ChickChickk/personalized-card/issues"
+  },
+  "homepage": "https://github.com/ChickChickk/personalized-card#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.1",
+    "groq-sdk": "^1.2.1"
+  }
+}
