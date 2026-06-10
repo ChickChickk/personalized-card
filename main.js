@@ -365,15 +365,22 @@ document.addEventListener("DOMContentLoaded", () => {
       clearInterval(msgInterval);
       loadingMsg.textContent = "Your card is ready! 🎉";
 
-      await new Promise((r) => setTimeout(r, 600));
+      const cardUrl = buildCardUrl(code, { preview: true });
+      history.pushState(null, "", cardUrl);
+
+      startCardMode({
+        to: state.to,
+        from: state.from,
+        message: state.message,
+        selectedGame: state.selectedGame,
+      });
+
+      await new Promise((r) => setTimeout(r, 400));
       overlay.classList.add("fade-out");
       await new Promise((r) => setTimeout(r, 400));
       overlay.classList.add("hidden");
       overlay.classList.remove("fade-out");
       confettiPieces.forEach((p) => p.remove());
-
-      const cardUrl = buildCardUrl(code, { preview: true });
-      window.location.href = cardUrl;
     } catch {
       clearInterval(msgInterval);
       confettiPieces.forEach((p) => p.remove());
