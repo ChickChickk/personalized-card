@@ -375,22 +375,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("btn-game-back").addEventListener("click", () => {
     stopActiveGame();
-    if (state.mode === "card") { window.close(); return; }
+    if (state.mode === "card") {
+      window.close();
+      // Fallback if window.close() is blocked by the browser
+      setTimeout(() => {
+        window.location.href = window.location.origin + window.location.pathname;
+      }, 150);
+      return;
+    }
     viewGameplay.classList.add("hidden");
     viewBuilder.classList.remove("hidden");
   });
 
   document.getElementById("btn-letter-back").addEventListener("click", () => {
     window.close();
+    // Fallback if window.close() is blocked by the browser
+    setTimeout(() => {
+      window.location.href = window.location.origin + window.location.pathname;
+    }, 150);
   });
 
   // ── Init ─────────────────────────────────────────────────────
 
   async function initApp() {
+    const code = new URLSearchParams(window.location.search).get("c");
     const cardData = await getCardDataFromUrl();
     if (cardData) {
-      // Store the code so "Copy share link" works on the letter view
-      state.currentCode = new URLSearchParams(window.location.search).get("c");
+      state.currentCode = code;
       startCardMode(cardData);
       return;
     }
