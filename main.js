@@ -286,6 +286,9 @@ document.addEventListener("DOMContentLoaded", () => {
     btnMagicDraft.textContent = "Generating…";
     btnMagicDraft.disabled = true;
 
+    const composerCore = document.querySelector(".composer-core");
+    composerCore.classList.add("generating");
+
     try {
       const text = await generateDraft(prompt);
       inputMessage.value = text;
@@ -302,6 +305,7 @@ document.addEventListener("DOMContentLoaded", () => {
         syncPreview();
       }
     } finally {
+      composerCore.classList.remove("generating");
       btnMagicDraft.textContent = "Generate ✨";
       btnMagicDraft.disabled = false;
     }
