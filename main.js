@@ -31,9 +31,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const prevLockMode = document.getElementById("prev-lock-mode");
 
   const gameCardsContainer = document.getElementById("game-cards-container");
-  const helperToneSelect = document.getElementById("helper-tone");
   const btnMagicDraft = document.getElementById("btn-magic-draft");
-  const helperDetail = document.getElementById("helper-detail");
+  const helperPrompt = document.getElementById("helper-prompt");
+  const helperTabs = document.querySelectorAll(".helper-tab");
+  const helperPanelAi = document.getElementById("helper-panel-ai");
+  const helperPanelManual = document.getElementById("helper-panel-manual");
   const thumbnailContainer = document.getElementById("preview-game-thumbnail");
   const btnCopyLink = document.getElementById("btn-copy-link");
   const shareNote = document.querySelector(".share-note");
@@ -59,11 +61,11 @@ document.addEventListener("DOMContentLoaded", () => {
     return res.json();
   }
 
-  async function generateDraft(to, tone, detail) {
+  async function generateDraft(prompt) {
     const res = await fetch(`${API_BASE}/api/draft`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ to, tone, detail }),
+      body: JSON.stringify({ prompt }),
     });
     if (!res.ok) throw new Error("Draft generation failed");
     const { message } = await res.json();
@@ -103,14 +105,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function initTones() {
-    if (!helperToneSelect) return;
-    helperToneSelect.innerHTML = "";
-    Object.keys(HELPER_REGISTRY).forEach((key) => {
-      const option = document.createElement("option");
-      option.value = key;
-      option.textContent = HELPER_REGISTRY[key].label;
-      helperToneSelect.appendChild(option);
+  function initHelperTabs() {
+    helperTabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        helperTabs.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        const isAi = tab.dataset.tab === "ai";
+        helperPanelAi.classList.toggle("hidden", !isAi);
+        helperPanelManual.classList.toggle("hidden", isAi);
+        if (isAi) helperPrompt.focus();
+        else inputMessage.focus();
+      });
     });
   }
 
@@ -200,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
     viewGameplay.classList.add("hidden");
     viewLetter.classList.add("hidden");
 
-    initTones();
+    initHelperTabs();
     renderGames();
     syncPreview();
     renderGameThumbnail(state.selectedGame);
@@ -272,30 +277,32 @@ document.addEventListener("DOMContentLoaded", () => {
   inputMessage.addEventListener("input", () => { syncPreview(); clearFormErrors(); });
 
   btnMagicDraft.addEventListener("click", async () => {
-    const toneKey = helperToneSelect.value;
-    btnMagicDraft.textContent = "Writing…";
+    const prompt = helperPrompt.value.trim();
+    if (!prompt) {
+      helperPrompt.focus();
+      return;
+    }
+
+    btnMagicDraft.textContent = "Generating…";
     btnMagicDraft.disabled = true;
 
     try {
-      const text = await generateDraft(
-        inputTo.value.trim() || "someone special",
-        toneKey,
-        helperDetail.value.trim()
-      );
+      const text = await generateDraft(prompt);
       inputMessage.value = text;
       syncPreview();
     } catch {
-      // Fall back to template helper if API fails
-      const targetHelper = HELPER_REGISTRY[toneKey];
-      if (targetHelper) {
-        inputMessage.value = targetHelper.generate(
+      // Fall back to a random template helper if API fails
+      const keys = Object.keys(HELPER_REGISTRY);
+      const fallback = HELPER_REGISTRY[keys[Math.floor(Math.random() * keys.length)]];
+      if (fallback) {
+        inputMessage.value = fallback.generate(
           inputTo.value.trim() || "someone special",
-          helperDetail.value.trim()
+          ""
         );
         syncPreview();
       }
     } finally {
-      btnMagicDraft.textContent = "Write me a draft ✨";
+      btnMagicDraft.textContent = "Generate ✨";
       btnMagicDraft.disabled = false;
     }
   });
