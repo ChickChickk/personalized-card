@@ -46,11 +46,19 @@
             </div>
 
             <div class="composer-core">
-              <textarea
-                id="input-message"
-                placeholder="Your letter unfolds here... write something unforgettable."
-                required
-              ></textarea>
+              <div class="textarea-wrap">
+                <textarea
+                  id="input-message"
+                  placeholder="Your letter unfolds here... write something unforgettable."
+                  required
+                ></textarea>
+                <div class="heartbeat-overlay hidden" id="heartbeat-overlay">
+                  <svg class="heartbeat-line" viewBox="0 0 300 60" preserveAspectRatio="xMidYMid meet">
+                    <polyline class="ekg-path" points="0,30 60,30 80,30 90,5 100,55 110,30 130,30 300,30"/>
+                  </svg>
+                  <span class="heartbeat-emoji" id="heartbeat-emoji">🤍</span>
+                </div>
+              </div>
 
               <div class="message-helper-integrated">
                 <div class="helper-tabs">

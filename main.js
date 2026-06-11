@@ -287,7 +287,9 @@ document.addEventListener("DOMContentLoaded", () => {
     btnMagicDraft.disabled = true;
 
     const composerCore = document.querySelector(".composer-core");
+    const heartbeatOverlay = document.getElementById("heartbeat-overlay");
     composerCore.classList.add("generating");
+    heartbeatOverlay.classList.remove("hidden");
 
     try {
       const text = await generateDraft(prompt);
@@ -307,6 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } finally {
       composerCore.classList.remove("generating");
+      heartbeatOverlay.classList.add("hidden");
       btnMagicDraft.textContent = "Generate ✨";
       btnMagicDraft.disabled = false;
     }
