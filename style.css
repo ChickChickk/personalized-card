@@ -8,8 +8,14 @@
   --panel-bg: rgba(255, 255, 255, 0.45);
   --font-display: "Stardom", Georgia, serif;
   --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
-  --desktop-scale: 0.9;
 }
+
+@media (min-width: 1024px) {
+  :root {
+    --desktop-scale: 0.75;
+  }
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -37,12 +43,6 @@ body {
   grid-template-columns: 1.2fr 0.8fr;
   gap: 2.5rem;
   align-items: center;
-}
-
-@media (min-width: 1024px) {
-  :root {
-    --desktop-scale: 0.9;
-  }
 }
 
 .page-shell,
@@ -141,7 +141,7 @@ main {
 }
 
 .heartbeat-svg {
-  width: 260px;
+  width: 160px;
   height: 60px;
   overflow: visible;
   filter: drop-shadow(0 0 6px rgba(231, 111, 81, 0.3));
@@ -153,14 +153,18 @@ main {
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 90 400;
-  stroke-dashoffset: 490;
+  stroke-dasharray: 70 260;
+  stroke-dashoffset: 330;
   animation: blip-travel 2.5s linear infinite;
 }
 
 @keyframes blip-travel {
-  from { stroke-dashoffset: 490; }
-  to   { stroke-dashoffset: -90; }
+  from {
+    stroke-dashoffset: 330;
+  }
+  to {
+    stroke-dashoffset: -70;
+  }
 }
 
 .message-helper-integrated {
@@ -169,35 +173,6 @@ main {
   padding-top: 1rem;
 }
 
-.helper-tabs {
-  display: flex;
-  gap: 0.25rem;
-  margin-bottom: 0.875rem;
-}
-
-.helper-tab {
-  padding: 0.35rem 0.85rem;
-  border: 1px solid var(--border-warm);
-  border-radius: 999px;
-  background: transparent;
-  font-family: var(--font-sans);
-  font-size: 0.8rem;
-  color: var(--text-muted-brown);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.helper-tab:hover {
-  border-color: var(--accent-orange);
-  color: var(--accent-orange);
-}
-
-.helper-tab.active {
-  background: var(--accent-orange);
-  border-color: var(--accent-orange);
-  color: #fff;
-  font-weight: 600;
-}
 
 .helper-panel {
   display: flex;
@@ -224,11 +199,6 @@ main {
   min-height: 44px;
 }
 
-.helper-manual-hint {
-  font-size: 0.875rem;
-  color: var(--text-muted-brown);
-  padding: 0.25rem 0;
-}
 
 .game-cards-track {
   display: grid;
