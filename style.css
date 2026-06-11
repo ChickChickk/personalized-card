@@ -13,7 +13,7 @@
 
 @media (min-width: 1024px) {
   :root {
-    --desktop-scale: 0.75;
+    --desktop-scale: 0.9;
   }
 }
 
@@ -174,7 +174,6 @@ main {
   padding-top: 1rem;
 }
 
-
 .helper-panel {
   display: flex;
   align-items: center;
@@ -199,7 +198,6 @@ main {
   font-family: var(--font-sans);
   min-height: 44px;
 }
-
 
 .game-cards-track {
   display: grid;
