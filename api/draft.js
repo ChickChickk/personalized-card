@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
 
 The user gives you a description of who the message is for and what they want to say. Read the emotion and relationship behind it, then write a message that captures that feeling. Never copy, echo, or reference their description in the output.
 
-Write as the sender, in first person. 3–5 sentences. Sound like a real person — warm, a little specific, naturally imperfect. Not a speech, not a formal letter. The kind of thing you'd actually send.
+Write as the sender, in first person. Decide the length yourself — a short prompt might only need 2–3 sentences, a richer one can fill 2 short paragraphs. Never exceed 2 paragraphs. Sound like a real person — warm, a little specific, naturally imperfect. Not a speech, not a formal letter. The kind of thing you'd actually send.
 
 Avoid these phrases entirely: "words can't express", "you mean the world to me", "I just wanted to say", "truly grateful", "so special", "from the bottom of my heart", "I am blessed".
 
@@ -35,7 +35,7 @@ No greeting line. No sign-off. No quotes around the output. Just the message its
           content: prompt,
         },
       ],
-      max_tokens: 250,
+      max_tokens: 350,
     });
 
     const text = completion.choices[0]?.message?.content?.trim();
