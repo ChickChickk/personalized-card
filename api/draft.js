@@ -10,17 +10,32 @@ module.exports = async (req, res) => {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { to, tone, detail } = req.body;
+  const { prompt } = req.body;
 
-  if (!tone) return res.status(400).json({ error: "Missing tone" });
-
-  const prompt = `Write a short heartfelt message (3-5 sentences) in a ${tone} tone, addressed to "${to || "someone special"}".${detail ? ` Include this detail: "${detail}".` : ""} Write only the message itself, no greeting line, no sign-off.`;
+  if (!prompt) return res.status(400).json({ error: "Missing prompt" });
 
   try {
     const completion = await groq.chat.completions.create({
-      model: "llama-3.1-8b-instant",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 200,
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "system",
+          content: `You write personal card messages. Think like a songwriter — take what someone describes and turn it into something that feels true, not just says the right words.
+
+The user gives you a description of who the message is for and what they want to say. Read the emotion and relationship behind it, then write a message that captures that feeling. Never copy, echo, or reference their description in the output.
+
+Write as the sender, in first person. 3–5 sentences. Sound like a real person — warm, a little specific, naturally imperfect. Not a speech, not a formal letter. The kind of thing you'd actually send.
+
+Avoid these phrases entirely: "words can't express", "you mean the world to me", "I just wanted to say", "truly grateful", "so special", "from the bottom of my heart", "I am blessed".
+
+No greeting line. No sign-off. No quotes around the output. Just the message itself.`,
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      max_tokens: 250,
     });
 
     const text = completion.choices[0]?.message?.content?.trim();

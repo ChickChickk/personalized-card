@@ -115,15 +115,45 @@ main {
   padding-top: 1rem;
 }
 
-.helper-controls {
+.helper-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 0.875rem;
+}
+
+.helper-tab {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--border-warm);
+  border-radius: 999px;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: var(--text-muted-brown);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.helper-tab:hover {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+}
+
+.helper-tab.active {
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+  color: #fff;
+  font-weight: 600;
+}
+
+.helper-panel {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
 }
 
-.helper-controls select,
-.helper-controls input {
+.helper-panel input {
+  flex: 1;
   padding: 0.58rem 0.72rem;
   border: 1px solid var(--border-warm);
   border-radius: 8px;
@@ -133,15 +163,17 @@ main {
   min-height: 44px;
 }
 
-.helper-controls input {
-  flex: 1;
-}
-
-.helper-controls button {
+.helper-panel button {
   font-size: 1rem;
   padding: 0.58rem 1rem;
   font-family: var(--font-sans);
   min-height: 44px;
+}
+
+.helper-manual-hint {
+  font-size: 0.875rem;
+  color: var(--text-muted-brown);
+  padding: 0.25rem 0;
 }
 
 .game-cards-track {
@@ -642,14 +674,13 @@ main {
   }
 
   /* Draft helper: stack controls full-width */
-  .helper-controls {
+  .helper-panel {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .helper-controls select,
-  .helper-controls input,
-  .helper-controls button {
+  .helper-panel input,
+  .helper-panel button {
     width: 100%;
   }
 

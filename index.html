@@ -53,21 +53,26 @@
               ></textarea>
 
               <div class="message-helper-integrated">
-                <div class="helper-trigger-text">Need a starter draft?</div>
-                <div class="helper-controls">
-                  <select id="helper-tone" aria-label="Select tone"></select>
+                <div class="helper-tabs">
+                  <button type="button" class="helper-tab active" data-tab="ai">Generate with AI ✨</button>
+                  <button type="button" class="helper-tab" data-tab="manual">Write it myself</button>
+                </div>
+                <div class="helper-panel" id="helper-panel-ai">
                   <input
                     type="text"
-                    id="helper-detail"
-                    placeholder="Add a custom memory or keyword..."
+                    id="helper-prompt"
+                    placeholder="e.g. a funny birthday note for my best friend who loves cats..."
                   />
                   <button
                     type="button"
                     id="btn-magic-draft"
                     class="btn-secondary"
                   >
-                    Write me a draft ✨
+                    Generate ✨
                   </button>
+                </div>
+                <div class="helper-panel hidden" id="helper-panel-manual">
+                  <p class="helper-manual-hint">Just type your message above — it's all yours. ✍️</p>
                 </div>
               </div>
             </div>
