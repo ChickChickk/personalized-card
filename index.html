@@ -53,10 +53,23 @@
                   required
                 ></textarea>
                 <div class="heartbeat-overlay hidden" id="heartbeat-overlay">
-                  <svg class="heartbeat-line" viewBox="0 0 300 60" preserveAspectRatio="xMidYMid meet">
-                    <polyline class="ekg-path" points="0,30 60,30 80,30 90,5 100,55 110,30 130,30 300,30"/>
+                  <svg class="heartbeat-svg" viewBox="0 0 300 60">
+                    <defs>
+                      <path id="ekg-route" d="M0,30 L70,30 L85,30 L95,8 L105,52 L115,30 L300,30"/>
+                    </defs>
+                    <!-- dim background trace -->
+                    <path d="M0,30 L70,30 L85,30 L95,8 L105,52 L115,30 L300,30"
+                      fill="none" stroke="#e76f51" stroke-width="1.5"
+                      stroke-linecap="round" stroke-linejoin="round" opacity="0.15"/>
+                    <!-- animated blip -->
+                    <path class="ekg-blip" d="M0,30 L70,30 L85,30 L95,8 L105,52 L115,30 L300,30"/>
+                    <!-- heart riding the path -->
+                    <text font-size="15" text-anchor="middle" dominant-baseline="central">🤍
+                      <animateMotion dur="2.5s" repeatCount="indefinite" rotate="0">
+                        <mpath href="#ekg-route"/>
+                      </animateMotion>
+                    </text>
                   </svg>
-                  <span class="heartbeat-emoji" id="heartbeat-emoji">🤍</span>
                 </div>
               </div>
 
