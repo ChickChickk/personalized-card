@@ -106,8 +106,8 @@ main {
 }
 
 @keyframes pulse-border {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(231, 111, 81, 0.15); }
-  50%       { box-shadow: 0 0 0 6px rgba(231, 111, 81, 0); }
+  0%, 100% { box-shadow: 0 0 0 3px rgba(231, 111, 81, 0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(231, 111, 81, 0.1); }
 }
 
 .composer-core textarea {

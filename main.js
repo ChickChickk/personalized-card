@@ -293,7 +293,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const text = await generateDraft(prompt);
       inputMessage.value = text;
       syncPreview();
-    } catch {
+    } catch (err) {
+      console.error("Draft generation failed:", err);
       // Fall back to a random template helper if API fails
       const keys = Object.keys(HELPER_REGISTRY);
       const fallback = HELPER_REGISTRY[keys[Math.floor(Math.random() * keys.length)]];
