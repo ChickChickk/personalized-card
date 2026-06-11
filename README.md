@@ -118,7 +118,7 @@ POST /api/draft  (Vercel serverless function)
 | Frontend | Vanilla HTML, CSS, JavaScript (no framework) |
 | Hosting | Vercel (static + serverless functions) |
 | Database | Supabase (Postgres) |
-| AI | Groq API — `llama-3.1-8b-instant` |
+| AI | Groq API — `llama-3.3-70b-versatile` |
 
 ---
 
