@@ -33,9 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const gameCardsContainer = document.getElementById("game-cards-container");
   const btnMagicDraft = document.getElementById("btn-magic-draft");
   const helperPrompt = document.getElementById("helper-prompt");
-  const helperTabs = document.querySelectorAll(".helper-tab");
-  const helperPanelAi = document.getElementById("helper-panel-ai");
-  const helperPanelManual = document.getElementById("helper-panel-manual");
   const thumbnailContainer = document.getElementById("preview-game-thumbnail");
   const btnCopyLink = document.getElementById("btn-copy-link");
   const shareNote = document.querySelector(".share-note");
@@ -103,20 +100,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (game && game.thumbnail && thumbnailContainer) {
       thumbnailContainer.innerHTML = game.thumbnail();
     }
-  }
-
-  function initHelperTabs() {
-    helperTabs.forEach((tab) => {
-      tab.addEventListener("click", () => {
-        helperTabs.forEach((t) => t.classList.remove("active"));
-        tab.classList.add("active");
-        const isAi = tab.dataset.tab === "ai";
-        helperPanelAi.classList.toggle("hidden", !isAi);
-        helperPanelManual.classList.toggle("hidden", isAi);
-        if (isAi) helperPrompt.focus();
-        else inputMessage.focus();
-      });
-    });
   }
 
   function renderGames() {
@@ -205,7 +188,6 @@ document.addEventListener("DOMContentLoaded", () => {
     viewGameplay.classList.add("hidden");
     viewLetter.classList.add("hidden");
 
-    initHelperTabs();
     renderGames();
     syncPreview();
     renderGameThumbnail(state.selectedGame);
