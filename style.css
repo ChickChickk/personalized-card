@@ -13,7 +13,7 @@
 
 @media (min-width: 1024px) {
   :root {
-    --desktop-scale: 0.9;
+    --desktop-scale: 0.85;
   }
 }
 
