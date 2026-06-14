@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# Pre-push hook: runs the Jest test suite before allowing a push.
+# If any test fails, the push is blocked so broken code stays on your machine.
+#
+# This hook is active because the repo is configured with:
+#   git config core.hooksPath .githooks
+
+echo "🧪 Running tests before push..."
+
+npm test
+RESULT=$?
+
+if [ $RESULT -ne 0 ]; then
+  echo ""
+  echo "❌ Tests failed — push aborted."
+  echo "   Fix the failing tests (or run 'npm test' to see them), then try again."
+  exit 1
+fi
+
+echo "✅ All tests passed — pushing."
+exit 0
