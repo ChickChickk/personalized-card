@@ -2,7 +2,9 @@
  * Main Application Pipeline Controller
  */
 
-const API_BASE = "https://personalized-card-steel.vercel.app";
+// Empty = same-origin relative paths (e.g. "/api/cards").
+// Frontend and API are served together on Vercel, so no domain needed.
+const API_BASE = "";
 
 document.addEventListener("DOMContentLoaded", () => {
   const state = {
