@@ -1,11 +1,5 @@
 const supabase = require("./_db");
-
-function generateCode(length = 6) {
-  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-  return Array.from({ length }, () =>
-    chars[Math.floor(Math.random() * chars.length)]
-  ).join("");
-}
+const { generateCode } = require("./_utils");
 
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
