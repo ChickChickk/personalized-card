@@ -11,20 +11,21 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  // Generate a unique short code
-  let code, exists;
-  do {
+  // Insert with a fresh code. The `code` column has a UNIQUE constraint, so
+  // the database guarantees no duplicates — on the rare collision (Postgres
+  // error 23505) we generate a new code and retry.
+  const MAX_ATTEMPTS = 5;
+  let code, error;
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     code = generateCode();
-    const { data } = await supabase.from("cards").select("code").eq("code", code).single();
-    exists = !!data;
-  } while (exists);
+    ({ error } = await supabase.from("cards").insert({
+      code,
+      data: { to, from, message, selectedGame },
+    }));
 
-  const { error } = await supabase.from("cards").insert({
-    code,
-    data: { to, from, message, selectedGame },
-  });
+    if (!error) return res.status(201).json({ code });
+    if (error.code !== "23505") break; // real error — stop retrying
+  }
 
-  if (error) return res.status(500).json({ error: error.message, details: error });
-
-  return res.status(201).json({ code });
+  return res.status(500).json({ error: error.message, details: error });
 };
