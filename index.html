@@ -55,14 +55,26 @@
                 <div class="heartbeat-overlay hidden" id="heartbeat-overlay">
                   <svg class="heartbeat-svg" viewBox="0 0 180 60">
                     <defs>
-                      <path id="ekg-route" d="M0,30 L45,30 L60,30 L70,8 L80,52 L90,30 L180,30"/>
+                      <path
+                        id="ekg-route"
+                        d="M0,30 L45,30 L60,30 L70,8 L80,52 L90,30 L180,30"
+                      />
                     </defs>
                     <!-- dim background trace -->
-                    <path d="M0,30 L45,30 L60,30 L70,8 L80,52 L90,30 L180,30"
-                      fill="none" stroke="#e76f51" stroke-width="1.5"
-                      stroke-linecap="round" stroke-linejoin="round" opacity="0.15"/>
+                    <path
+                      d="M0,30 L45,30 L60,30 L70,8 L80,52 L90,30 L180,30"
+                      fill="none"
+                      stroke="#e76f51"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      opacity="0.15"
+                    />
                     <!-- animated blip -->
-                    <path class="ekg-blip" d="M0,30 L45,30 L60,30 L70,8 L80,52 L90,30 L180,30"/>
+                    <path
+                      class="ekg-blip"
+                      d="M0,30 L45,30 L60,30 L70,8 L80,52 L90,30 L180,30"
+                    />
                   </svg>
                 </div>
               </div>
@@ -72,7 +84,7 @@
                   <input
                     type="text"
                     id="helper-prompt"
-                    placeholder="e.g. a funny birthday note for my best friend who loves cats..."
+                    placeholder="What do you want to say? AI will help you write it✨"
                   />
                   <button
                     type="button"
@@ -151,17 +163,27 @@
 
       <section id="letter-view" class="runtime-screen hidden">
         <div class="letter-reveal-canvas">
-<button type="button" id="btn-letter-back" class="btn-back">
+          <button type="button" id="btn-letter-back" class="btn-back">
             ← Build Another Card
           </button>
           <div class="letter-font-controls">
             <span class="font-slider-label">Aa</span>
-            <input type="range" id="font-slider" class="font-slider"
-              min="80" max="160" step="5" value="90"
-              aria-label="Adjust font size" />
+            <input
+              type="range"
+              id="font-slider"
+              class="font-slider"
+              min="80"
+              max="160"
+              step="5"
+              value="90"
+              aria-label="Adjust font size"
+            />
           </div>
           <div class="letter-letterhead">
-            <p>Dearest <span id="final-to" class="signature-name">Someone Special</span>,</p>
+            <p>
+              Dearest
+              <span id="final-to" class="signature-name">Someone Special</span>,
+            </p>
           </div>
           <div class="letter-body-content">
             <p id="final-message" class="preserve-lines"></p>
@@ -202,7 +224,9 @@
 
     <div id="loading-overlay" class="loading-overlay hidden" aria-live="polite">
       <div class="loading-content">
-        <p class="loading-message" id="loading-message">Sealing your envelope…</p>
+        <p class="loading-message" id="loading-message">
+          Sealing your envelope…
+        </p>
       </div>
     </div>
 
