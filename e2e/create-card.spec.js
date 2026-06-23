@@ -12,6 +12,13 @@ const { test, expect } = require("@playwright/test");
 const TAG = "E2E-TEST";
 const PROMPT = "a warm birthday note for my best friend";
 
+// Optional pacing for demo videos: set E2E_PAUSE (ms, e.g. 2500) to hold on
+// each milestone so the run is easy to follow. Defaults to 0 (fast) for CI.
+const STEP_PAUSE_MS = Number(process.env.E2E_PAUSE || 0);
+async function beat(p) {
+  if (STEP_PAUSE_MS) await p.waitForTimeout(STEP_PAUSE_MS);
+}
+
 // Data-driven list of games to exercise. We start with balloons; to cover
 // every game later, add entries here and give each a `play` strategy.
 // (Canvas games with random/animated targets are popped by sweeping clicks;
@@ -42,7 +49,8 @@ for (const game of GAMES) {
     //    fallback the UI uses when the API errors.
     await page.fill("#helper-prompt", PROMPT);
     const draftResponse = page.waitForResponse(
-      (res) => res.url().includes("/api/draft") && res.request().method() === "POST"
+      (res) =>
+        res.url().includes("/api/draft") && res.request().method() === "POST",
     );
     await page.click("#btn-magic-draft");
     const response = await draftResponse;
@@ -63,12 +71,14 @@ for (const game of GAMES) {
     await expect(page.locator("#success-to")).toHaveText(TAG);
     await expect(page.locator("#success-game")).toHaveText(game.title);
     await expect(page.locator("#share-link-input")).toHaveValue(/\?c=/);
+    await beat(page);
 
     // 6. Copy the share link via the button, then read it from the clipboard.
     await page.click("#btn-copy-link");
     const shareUrl = await page.evaluate(() => navigator.clipboard.readText());
     expect(shareUrl).toContain("?c=");
     expect(shareUrl).not.toContain("preview=1"); // a real recipient link
+    await beat(page);
 
     // 7. "Preview as recipient" plays the game all the way through to the
     //    letter (just like a recipient would), then "Back" returns to success.
@@ -78,8 +88,10 @@ for (const game of GAMES) {
     await game.play(page);
     await expect(page.locator("#letter-view")).toBeVisible({ timeout: 15_000 });
     await expect(page.locator("#final-message")).toHaveText(aiMessage);
+    await beat(page);
     await page.click("#btn-letter-back");
     await expect(page.locator("#success-view")).toBeVisible();
+    await beat(page);
 
     // 8. "See the message" reveals the letter without playing the game, and
     //    "Back" returns to the success screen.
@@ -87,8 +99,10 @@ for (const game of GAMES) {
     await expect(page.locator("#letter-view")).toBeVisible();
     await expect(page.locator("#final-to")).toHaveText(TAG);
     await expect(page.locator("#final-message")).toHaveText(aiMessage);
+    await beat(page);
     await page.click("#btn-letter-back");
     await expect(page.locator("#success-view")).toBeVisible();
+    await beat(page);
 
     // 9. "Create another card" returns the sender to a fresh, empty builder —
     //    the journey ends back on the first page.
@@ -97,6 +111,7 @@ for (const game of GAMES) {
     await expect(page.locator("#input-to")).toHaveValue("");
     await expect(page.locator("#input-from")).toHaveValue("");
     await expect(page.locator("#input-message")).toHaveValue("");
+    await beat(page);
 
     // 10. Finally, confirm the share link works for a real recipient — a fresh,
     //     isolated browser (a different person on another device). This runs in
@@ -105,11 +120,16 @@ for (const game of GAMES) {
     const recipientPage = await recipientContext.newPage();
     await recipientPage.goto(shareUrl);
     await expect(recipientPage.locator("#gameplay-view")).toBeVisible();
-    await expect(recipientPage.locator("#game-engine-stage canvas")).toBeVisible();
+    await expect(
+      recipientPage.locator("#game-engine-stage canvas"),
+    ).toBeVisible();
     await game.play(recipientPage);
-    await expect(recipientPage.locator("#letter-view")).toBeVisible({ timeout: 15_000 });
+    await expect(recipientPage.locator("#letter-view")).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(recipientPage.locator("#final-to")).toHaveText(TAG);
     await expect(recipientPage.locator("#final-message")).toHaveText(aiMessage);
+    await beat(recipientPage);
     await recipientContext.close();
   });
 }
