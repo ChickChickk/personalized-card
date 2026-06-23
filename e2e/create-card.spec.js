@@ -1,6 +1,7 @@
 // End-to-end test of the full card pipeline:
-//   fill form → AI-generate the message → create card → success screen →
-//   copy share link → recipient opens link → plays game → letter reveals.
+//   fill form → AI-generate the message → create card → success screen
+//   (see the message / preview as recipient / copy link / create another) →
+//   recipient opens link → plays game → letter reveals.
 //
 // Runs against the URL in playwright.config.js (production by default).
 // Test cards are tagged with TAG below so they're easy to spot/delete in
@@ -20,7 +21,7 @@ const GAMES = [
 ];
 
 for (const game of GAMES) {
-  test(`create card → play ${game.id} → share link works for recipient`, async ({
+  test(`create card → success-screen actions → ${game.id} share link works for recipient`, async ({
     page,
     context,
     browser,
@@ -72,13 +73,22 @@ for (const game of GAMES) {
     await page.click("#btn-letter-back");
     await expect(page.locator("#success-view")).toBeVisible();
 
-    // 7. Copy the share link via the button, then read it from the clipboard.
+    // 7. "Preview as recipient" drops the sender into the game; "Back" returns
+    //    to the success screen. (The full play-through is covered below for the
+    //    real recipient, so here we only confirm the routing.)
+    await page.click("#btn-preview-recipient");
+    await expect(page.locator("#gameplay-view")).toBeVisible();
+    await expect(page.locator("#game-engine-stage canvas")).toBeVisible();
+    await page.click("#btn-game-back");
+    await expect(page.locator("#success-view")).toBeVisible();
+
+    // 8. Copy the share link via the button, then read it from the clipboard.
     await page.click("#btn-copy-link");
     const shareUrl = await page.evaluate(() => navigator.clipboard.readText());
     expect(shareUrl).toContain("?c=");
     expect(shareUrl).not.toContain("preview=1"); // a real recipient link
 
-    // 8. Open that link as a brand-new visitor (fresh, isolated context — no
+    // 9. Open that link as a brand-new visitor (fresh, isolated context — no
     //    shared cookies/storage, like a different person on another device).
     const recipientContext = await browser.newContext();
     const recipientPage = await recipientContext.newPage();
@@ -89,12 +99,20 @@ for (const game of GAMES) {
     await expect(recipientPage.locator("#game-engine-stage canvas")).toBeVisible();
     await game.play(recipientPage);
 
-    // 9. The same card — same AI message — is revealed to the recipient.
+    // 10. The same card — same AI message — is revealed to the recipient.
     await expect(recipientPage.locator("#letter-view")).toBeVisible({ timeout: 15_000 });
     await expect(recipientPage.locator("#final-to")).toHaveText(TAG);
     await expect(recipientPage.locator("#final-message")).toHaveText(aiMessage);
-
     await recipientContext.close();
+
+    // 11. Back on the sender's success screen, "Create another card" resets to
+    //     a fresh, empty builder.
+    await expect(page.locator("#success-view")).toBeVisible();
+    await page.click("#btn-create-another");
+    await expect(page.locator("#builder-view")).toBeVisible();
+    await expect(page.locator("#input-to")).toHaveValue("");
+    await expect(page.locator("#input-from")).toHaveValue("");
+    await expect(page.locator("#input-message")).toHaveValue("");
   });
 }
 
