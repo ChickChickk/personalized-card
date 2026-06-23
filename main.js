@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const viewBuilder = document.getElementById("builder-view");
+  const viewSuccess = document.getElementById("success-view");
   const viewGameplay = document.getElementById("gameplay-view");
   const viewLetter = document.getElementById("letter-view");
   const formCreation = document.getElementById("creation-form");
@@ -38,6 +39,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const thumbnailContainer = document.getElementById("preview-game-thumbnail");
   const btnCopyLink = document.getElementById("btn-copy-link");
   const shareNote = document.querySelector(".share-note");
+  const shareLinkInput = document.getElementById("share-link-input");
+  const btnPreviewRecipient = document.getElementById("btn-preview-recipient");
+  const btnSeeMessage = document.getElementById("btn-see-message");
+  const btnCreateAnother = document.getElementById("btn-create-another");
   const formErrors = document.getElementById("form-errors");
   const btnCreateCard = document.getElementById("btn-create-card");
 
@@ -181,14 +186,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── App modes ────────────────────────────────────────────────
 
+  function currentCardData() {
+    return {
+      to: state.to,
+      from: state.from,
+      message: state.message,
+      selectedGame: state.selectedGame,
+    };
+  }
+
+  function hideAllViews() {
+    viewBuilder.classList.add("hidden");
+    viewSuccess.classList.add("hidden");
+    viewGameplay.classList.add("hidden");
+    viewLetter.classList.add("hidden");
+  }
+
   function startBuilderMode() {
     state.mode = "builder";
     document.body.classList.add("mode-builder");
-    document.body.classList.remove("mode-card");
+    document.body.classList.remove("mode-card", "mode-shared-link", "mode-creator-preview");
 
+    hideAllViews();
     viewBuilder.classList.remove("hidden");
-    viewGameplay.classList.add("hidden");
-    viewLetter.classList.add("hidden");
 
     renderGames();
     syncPreview();
@@ -201,27 +221,57 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function startCardMode(cardData) {
+  // Sender-only screen shown right after a card is created: surfaces the share
+  // link and lets the sender optionally preview without being forced to play.
+  function showSuccessView() {
+    state.mode = "success";
+    document.body.classList.add("mode-card", "mode-creator-preview");
+    document.body.classList.remove("mode-builder", "mode-shared-link");
+
+    hideAllViews();
+    viewSuccess.classList.remove("hidden");
+
+    document.getElementById("success-to").textContent = state.to || "—";
+    document.getElementById("success-from").textContent = state.from || "—";
+    const game = GAME_REGISTRY[state.selectedGame];
+    document.getElementById("success-game").textContent = game
+      ? game.title
+      : state.selectedGame;
+
+    if (shareLinkInput) shareLinkInput.value = getShareUrl();
+    if (shareNote) {
+      shareNote.textContent = "Anyone with this link can open the card.";
+      shareNote.classList.remove("is-copied");
+    }
+    if (btnCopyLink) btnCopyLink.textContent = "Copy 🔗";
+  }
+
+  function startCardMode(cardData, isCreatorPreview = false) {
     state.mode = "card";
     state.to = cardData.to || "";
     state.from = cardData.from || "";
     state.message = cardData.message || "";
     state.selectedGame = cardData.selectedGame || "balloons";
 
-    const params = new URLSearchParams(window.location.search);
-    const isCreatorPreview = params.get("preview") === "1";
     const isSharedLink = !isCreatorPreview;
 
     document.body.classList.add("mode-card");
     document.body.classList.toggle("mode-shared-link", isSharedLink);
-    document.body.classList.toggle("mode-creator-preview", !isSharedLink);
+    document.body.classList.toggle("mode-creator-preview", isCreatorPreview);
     document.body.classList.remove("mode-builder");
 
-    viewBuilder.classList.add("hidden");
-    viewLetter.classList.add("hidden");
+    hideAllViews();
     viewGameplay.classList.remove("hidden");
 
     startSelectedGame();
+  }
+
+  function revealLetter() {
+    hideAllViews();
+    viewLetter.classList.remove("hidden");
+    document.getElementById("final-to").textContent = state.to;
+    document.getElementById("final-from").textContent = state.from;
+    document.getElementById("final-message").textContent = state.message;
   }
 
   function startSelectedGame() {
@@ -238,13 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const stage = document.getElementById("game-engine-stage");
     stage.innerHTML = "";
 
-    state.activeLoopId = game.start(stage, () => {
-      viewGameplay.classList.add("hidden");
-      viewLetter.classList.remove("hidden");
-      document.getElementById("final-to").textContent = state.to;
-      document.getElementById("final-from").textContent = state.from;
-      document.getElementById("final-message").textContent = state.message;
-    });
+    state.activeLoopId = game.start(stage, revealLetter);
   }
 
   function stopActiveGame() {
@@ -364,16 +408,8 @@ document.addEventListener("DOMContentLoaded", () => {
       clearInterval(msgInterval);
       loadingMsg.textContent = "Your card is ready! 🎉";
 
-      const cardUrl = buildCardUrl(code, { preview: true });
-      history.pushState(null, "", cardUrl);
       state.createdInPlace = true;
-
-      startCardMode({
-        to: state.to,
-        from: state.from,
-        message: state.message,
-        selectedGame: state.selectedGame,
-      });
+      showSuccessView();
 
       await new Promise((r) => setTimeout(r, 400));
       overlay.classList.add("fade-out");
@@ -413,7 +449,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (btnCopyLink) {
           btnCopyLink.textContent = "Copied ✓";
-          setTimeout(() => { btnCopyLink.textContent = "Copy share link 🔗"; }, 1600);
+          setTimeout(() => { btnCopyLink.textContent = "Copy 🔗"; }, 1600);
         }
       } catch {
         if (shareNote) {
@@ -424,28 +460,60 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Success screen → optionally play through the card as the recipient would.
+  if (btnPreviewRecipient) {
+    btnPreviewRecipient.addEventListener("click", () => {
+      startCardMode(currentCardData(), true);
+    });
+  }
+
+  // Success screen → jump straight to the message, skipping the game.
+  if (btnSeeMessage) {
+    btnSeeMessage.addEventListener("click", () => {
+      document.body.classList.add("mode-card", "mode-creator-preview");
+      document.body.classList.remove("mode-builder", "mode-shared-link");
+      revealLetter();
+    });
+  }
+
+  // Success screen → start a fresh card.
+  if (btnCreateAnother) {
+    btnCreateAnother.addEventListener("click", () => {
+      history.pushState(null, "", window.location.origin + window.location.pathname);
+      state.createdInPlace = false;
+      state.currentCode = null;
+      inputTo.value = "";
+      inputFrom.value = "";
+      inputMessage.value = "";
+      helperPrompt.value = "";
+      startBuilderMode();
+    });
+  }
+
   document.getElementById("font-slider").addEventListener("input", (e) => {
     document.getElementById("final-message").style.fontSize = e.target.value / 100 + "rem";
   });
 
   document.getElementById("btn-game-back").addEventListener("click", () => {
     stopActiveGame();
-    if (state.mode === "card" && !state.createdInPlace) {
-      window.close();
-      setTimeout(() => {
-        window.location.href = window.location.origin + window.location.pathname;
-      }, 150);
+    // Sender previewing their own card → back to the success screen.
+    if (state.createdInPlace) {
+      showSuccessView();
       return;
     }
-    history.pushState(null, "", window.location.origin + window.location.pathname);
-    state.createdInPlace = false;
-    inputTo.value = state.to;
-    inputFrom.value = state.from;
-    inputMessage.value = state.message;
-    startBuilderMode();
+    // Legacy/standalone preview link → leave or fall back to the builder.
+    window.close();
+    setTimeout(() => {
+      window.location.href = window.location.origin + window.location.pathname;
+    }, 150);
   });
 
   document.getElementById("btn-letter-back").addEventListener("click", () => {
+    // Sender previewing their own card → back to the success screen.
+    if (state.createdInPlace) {
+      showSuccessView();
+      return;
+    }
     window.close();
     // Fallback if window.close() is blocked by the browser
     setTimeout(() => {
@@ -456,11 +524,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // ── Init ─────────────────────────────────────────────────────
 
   async function initApp() {
-    const code = new URLSearchParams(window.location.search).get("c");
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("c");
+    const isCreatorPreview = params.get("preview") === "1";
     const cardData = await getCardDataFromUrl();
     if (cardData) {
       state.currentCode = code;
-      startCardMode(cardData);
+      startCardMode(cardData, isCreatorPreview);
       return;
     }
     startBuilderMode();

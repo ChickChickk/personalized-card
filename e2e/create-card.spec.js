@@ -1,5 +1,6 @@
 // End-to-end test of the full card pipeline:
-//   fill form → AI-generate the message → create card → play the mini-game → letter reveals.
+//   fill form → AI-generate the message → create card → success screen →
+//   copy share link → recipient opens link → plays game → letter reveals.
 //
 // Runs against the URL in playwright.config.js (production by default).
 // Test cards are tagged with TAG below so they're easy to spot/delete in
@@ -55,27 +56,29 @@ for (const game of GAMES) {
     // 4. Pick the game.
     await page.click(`.game-mode-card[data-game-id="${game.id}"]`);
 
-    // 5. Create the card → goes straight to the gameplay view in-place.
+    // 5. Create the card → lands on the success screen (no forced gameplay).
     await page.click("#btn-create-card");
-    await expect(page.locator("#gameplay-view")).toBeVisible();
-    await expect(page.locator("#game-engine-stage canvas")).toBeVisible();
+    await expect(page.locator("#success-view")).toBeVisible();
+    await expect(page.locator("#success-to")).toHaveText(TAG);
+    await expect(page.locator("#success-game")).toHaveText(game.title);
+    await expect(page.locator("#share-link-input")).toHaveValue(/\?c=/);
 
-    // 6. Play until the game completes.
-    await game.play(page);
-
-    // 7. The letter is revealed with the AI-generated message intact.
-    await expect(page.locator("#letter-view")).toBeVisible({ timeout: 15_000 });
+    // 6. "See the message" reveals the letter without playing the game, and
+    //    "Back" returns to the success screen.
+    await page.click("#btn-see-message");
+    await expect(page.locator("#letter-view")).toBeVisible();
     await expect(page.locator("#final-to")).toHaveText(TAG);
-    await expect(page.locator("#final-from")).toHaveText(TAG);
     await expect(page.locator("#final-message")).toHaveText(aiMessage);
+    await page.click("#btn-letter-back");
+    await expect(page.locator("#success-view")).toBeVisible();
 
-    // 8. Copy the share link via the button, then read it from the clipboard.
+    // 7. Copy the share link via the button, then read it from the clipboard.
     await page.click("#btn-copy-link");
     const shareUrl = await page.evaluate(() => navigator.clipboard.readText());
     expect(shareUrl).toContain("?c=");
     expect(shareUrl).not.toContain("preview=1"); // a real recipient link
 
-    // 9. Open that link as a brand-new visitor (fresh, isolated context — no
+    // 8. Open that link as a brand-new visitor (fresh, isolated context — no
     //    shared cookies/storage, like a different person on another device).
     const recipientContext = await browser.newContext();
     const recipientPage = await recipientContext.newPage();
@@ -86,7 +89,7 @@ for (const game of GAMES) {
     await expect(recipientPage.locator("#game-engine-stage canvas")).toBeVisible();
     await game.play(recipientPage);
 
-    // 10. The same card — same AI message — is revealed to the recipient.
+    // 9. The same card — same AI message — is revealed to the recipient.
     await expect(recipientPage.locator("#letter-view")).toBeVisible({ timeout: 15_000 });
     await expect(recipientPage.locator("#final-to")).toHaveText(TAG);
     await expect(recipientPage.locator("#final-message")).toHaveText(aiMessage);
