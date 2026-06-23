@@ -36,6 +36,25 @@
   }
 }
 
+/* Short viewports (small MacBooks, laptops with lots of browser chrome) —
+   scale down further so the whole builder, including the Create button,
+   stays visible without scrolling. */
+@media (min-width: 1024px) and (max-height: 800px) {
+  :root {
+    --desktop-scale: 0.78;
+  }
+}
+@media (min-width: 1024px) and (max-height: 745px) {
+  :root {
+    --desktop-scale: 0.72;
+  }
+}
+@media (min-width: 1024px) and (max-height: 690px) {
+  :root {
+    --desktop-scale: 0.66;
+  }
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -68,8 +87,7 @@ body {
 .page-shell,
 .app-shell,
 main {
-  transform: scale(var(--desktop-scale));
-  transform-origin: center center;
+  zoom: var(--desktop-scale);
 }
 
 @media (max-width: 600px) {
