@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "jest",
-    "e2e": "playwright test",
+    "e2e": "E2E_PAUSE=1000 playwright test",
     "e2e:demo": "E2E_SLOWMO=250 E2E_PAUSE=2500 playwright test --headed"
   },
   "jest": {
