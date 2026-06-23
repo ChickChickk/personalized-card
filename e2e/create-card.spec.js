@@ -73,13 +73,15 @@ for (const game of GAMES) {
     await page.click("#btn-letter-back");
     await expect(page.locator("#success-view")).toBeVisible();
 
-    // 7. "Preview as recipient" drops the sender into the game; "Back" returns
-    //    to the success screen. (The full play-through is covered below for the
-    //    real recipient, so here we only confirm the routing.)
+    // 7. "Preview as recipient" plays the game all the way through to the
+    //    letter (just like a recipient would), then "Back" returns to success.
     await page.click("#btn-preview-recipient");
     await expect(page.locator("#gameplay-view")).toBeVisible();
     await expect(page.locator("#game-engine-stage canvas")).toBeVisible();
-    await page.click("#btn-game-back");
+    await game.play(page);
+    await expect(page.locator("#letter-view")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("#final-message")).toHaveText(aiMessage);
+    await page.click("#btn-letter-back");
     await expect(page.locator("#success-view")).toBeVisible();
 
     // 8. Copy the share link via the button, then read it from the clipboard.
@@ -88,31 +90,27 @@ for (const game of GAMES) {
     expect(shareUrl).toContain("?c=");
     expect(shareUrl).not.toContain("preview=1"); // a real recipient link
 
-    // 9. Open that link as a brand-new visitor (fresh, isolated context — no
-    //    shared cookies/storage, like a different person on another device).
-    const recipientContext = await browser.newContext();
-    const recipientPage = await recipientContext.newPage();
-    await recipientPage.goto(shareUrl);
-
-    // The recipient must play the game to unlock the message.
-    await expect(recipientPage.locator("#gameplay-view")).toBeVisible();
-    await expect(recipientPage.locator("#game-engine-stage canvas")).toBeVisible();
-    await game.play(recipientPage);
-
-    // 10. The same card — same AI message — is revealed to the recipient.
-    await expect(recipientPage.locator("#letter-view")).toBeVisible({ timeout: 15_000 });
-    await expect(recipientPage.locator("#final-to")).toHaveText(TAG);
-    await expect(recipientPage.locator("#final-message")).toHaveText(aiMessage);
-    await recipientContext.close();
-
-    // 11. Back on the sender's success screen, "Create another card" resets to
-    //     a fresh, empty builder.
-    await expect(page.locator("#success-view")).toBeVisible();
+    // 9. "Create another card" returns the sender to a fresh, empty builder —
+    //    the journey ends back on the first page.
     await page.click("#btn-create-another");
     await expect(page.locator("#builder-view")).toBeVisible();
     await expect(page.locator("#input-to")).toHaveValue("");
     await expect(page.locator("#input-from")).toHaveValue("");
     await expect(page.locator("#input-message")).toHaveValue("");
+
+    // 10. Finally, confirm the share link works for a real recipient — a fresh,
+    //     isolated browser (a different person on another device). This runs in
+    //     its own context, so it opens as a separate window with its own video.
+    const recipientContext = await browser.newContext();
+    const recipientPage = await recipientContext.newPage();
+    await recipientPage.goto(shareUrl);
+    await expect(recipientPage.locator("#gameplay-view")).toBeVisible();
+    await expect(recipientPage.locator("#game-engine-stage canvas")).toBeVisible();
+    await game.play(recipientPage);
+    await expect(recipientPage.locator("#letter-view")).toBeVisible({ timeout: 15_000 });
+    await expect(recipientPage.locator("#final-to")).toHaveText(TAG);
+    await expect(recipientPage.locator("#final-message")).toHaveText(aiMessage);
+    await recipientContext.close();
   });
 }
 
