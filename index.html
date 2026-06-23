@@ -145,10 +145,57 @@
         </section>
       </main>
 
+      <section id="success-view" class="runtime-screen hidden">
+        <div class="runtime-card-panel">
+          <header class="runtime-header">
+            <span class="runtime-emoji">🎉</span>
+            <h2>Your card is ready!</h2>
+            <p>
+              Share the link below — your message stays locked until they beat
+              the game.
+            </p>
+          </header>
+
+          <div class="success-recap">
+            <span>To <strong id="success-to">—</strong></span>
+            <span>From <strong id="success-from">—</strong></span>
+            <span>Game <strong id="success-game">—</strong></span>
+          </div>
+
+          <div class="share-link-row">
+            <input
+              type="text"
+              id="share-link-input"
+              readonly
+              aria-label="Your share link"
+            />
+            <button type="button" id="btn-copy-link" class="btn-primary">
+              Copy 🔗
+            </button>
+          </div>
+          <p class="share-note">Anyone with this link can open the card.</p>
+
+          <div class="success-actions">
+            <button type="button" id="btn-preview-recipient" class="btn-secondary">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>
+              Preview as recipient
+            </button>
+            <button type="button" id="btn-see-message" class="btn-secondary">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+              See the message
+            </button>
+            <button type="button" id="btn-create-another" class="btn-secondary">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              Create another card
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section id="gameplay-view" class="runtime-screen hidden">
         <div class="runtime-card-panel">
           <button type="button" id="btn-game-back" class="btn-back">
-            ← Go Back & Edit
+            ← Back
           </button>
           <header class="runtime-header">
             <span id="game-icon-display" class="runtime-emoji">🎈</span>
@@ -164,7 +211,7 @@
       <section id="letter-view" class="runtime-screen hidden">
         <div class="letter-reveal-canvas">
           <button type="button" id="btn-letter-back" class="btn-back">
-            ← Build Another Card
+            ← Back
           </button>
           <div class="letter-font-controls">
             <span class="font-slider-label">Aa</span>
@@ -191,12 +238,6 @@
           <div class="letter-signoff">
             <p>With love,</p>
             <p class="signature-name" id="final-from">you</p>
-          </div>
-          <div class="letter-actions">
-            <button type="button" id="btn-copy-link" class="btn-secondary">
-              Copy share link 🔗
-            </button>
-            <p class="share-note">Anyone with this link can open the card.</p>
           </div>
         </div>
       </section>
