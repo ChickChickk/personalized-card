@@ -64,14 +64,11 @@ for (const game of GAMES) {
     await expect(page.locator("#success-game")).toHaveText(game.title);
     await expect(page.locator("#share-link-input")).toHaveValue(/\?c=/);
 
-    // 6. "See the message" reveals the letter without playing the game, and
-    //    "Back" returns to the success screen.
-    await page.click("#btn-see-message");
-    await expect(page.locator("#letter-view")).toBeVisible();
-    await expect(page.locator("#final-to")).toHaveText(TAG);
-    await expect(page.locator("#final-message")).toHaveText(aiMessage);
-    await page.click("#btn-letter-back");
-    await expect(page.locator("#success-view")).toBeVisible();
+    // 6. Copy the share link via the button, then read it from the clipboard.
+    await page.click("#btn-copy-link");
+    const shareUrl = await page.evaluate(() => navigator.clipboard.readText());
+    expect(shareUrl).toContain("?c=");
+    expect(shareUrl).not.toContain("preview=1"); // a real recipient link
 
     // 7. "Preview as recipient" plays the game all the way through to the
     //    letter (just like a recipient would), then "Back" returns to success.
@@ -84,11 +81,14 @@ for (const game of GAMES) {
     await page.click("#btn-letter-back");
     await expect(page.locator("#success-view")).toBeVisible();
 
-    // 8. Copy the share link via the button, then read it from the clipboard.
-    await page.click("#btn-copy-link");
-    const shareUrl = await page.evaluate(() => navigator.clipboard.readText());
-    expect(shareUrl).toContain("?c=");
-    expect(shareUrl).not.toContain("preview=1"); // a real recipient link
+    // 8. "See the message" reveals the letter without playing the game, and
+    //    "Back" returns to the success screen.
+    await page.click("#btn-see-message");
+    await expect(page.locator("#letter-view")).toBeVisible();
+    await expect(page.locator("#final-to")).toHaveText(TAG);
+    await expect(page.locator("#final-message")).toHaveText(aiMessage);
+    await page.click("#btn-letter-back");
+    await expect(page.locator("#success-view")).toBeVisible();
 
     // 9. "Create another card" returns the sender to a fresh, empty builder —
     //    the journey ends back on the first page.
