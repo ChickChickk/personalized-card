@@ -1,0 +1,51 @@
+# Example card messages that teach the AI your preferred style.
+#
+# HOW TO USE:
+#   - Add or replace messages below. Separate each one with a line of three dashes: ---
+#   - Lines starting with # are notes/comments and are ignored.
+#   - Keep your BEST examples here — quality matters more than quantity. 5–15 is plenty.
+#   - The AI reads these as "write things that feel like this", so put in the tone,
+#     length, and voice you want it to imitate.
+
+I still think about the way you used to leave the porch light on for me, even when I said I'd be late. You never made a thing of it. That's just who you are — quietly making sure the people you love always have a way home. I hope you know I notice. I always have.
+
+---
+
+You taught me that being brave doesn't always look loud. Sometimes it's just showing up again the next morning, tired and trying. I've watched you do that more times than you'll ever take credit for, and it changed how I see my own hard days.
+
+---
+
+I don't know when it happened, but somewhere along the way your laugh became the sound I measure a good day by. Today I just wanted you to have it written down somewhere — that you make the ordinary feel like enough.
+
+---
+
+There's a version of me that only exists around you: lighter, sillier, less afraid to be wrong. I like that person. Thank you for being the kind of safe that lets someone become more themselves.
+
+---
+
+You've had a harder year than you let on, and you still kept room in your hands for everyone else. I see it. Let this be the small thing that holds you for once, instead of the other way around.
+
+---
+
+# Birthday — playful but real
+Another year of you, which means another year of me being slightly smug about knowing you before everyone else figured out how great you are. I hope today is exactly as ridiculous and good as you are. Eat the bigger slice. You've earned the whole cake, honestly.
+
+---
+
+# Thank you — specific and grounded
+I don't think you realize you did anything. You just showed up with coffee and didn't ask me to explain myself, and somehow that was the exact thing. I've been carrying that morning around for weeks. Thank you for being the kind of person who knows when not to say much.
+
+---
+
+# Apology — honest, no excuses
+I've started this a few times and kept deleting the part where I explain myself, because the explaining isn't the point. I was wrong, and I'd rather just say that plainly than dress it up. You deserved better from me, and I'm going to be better. I miss how easy things are with us.
+
+---
+
+# Long-distance / missing someone
+It's the small ones that get me — going to text you something stupid and remembering you're three time zones away. Distance is mostly fine until it suddenly isn't. Just know that wherever I am, some part of the day is always quietly reserved for thinking about you.
+
+---
+
+# Encouragement before something hard
+You don't have to feel ready. Nobody who's ever done something brave felt ready first — they just went, shaking a little, and figured it out on the way. I've seen you do harder things than this without even noticing they were hard. Go be exactly as much as you already are.
