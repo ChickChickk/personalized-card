@@ -420,7 +420,8 @@ document.addEventListener("DOMContentLoaded", () => {
     ideaSlider.addEventListener("click", (e) => {
       const chip = e.target.closest(".chip-idea");
       if (!chip || dragged) return;
-      helperPrompt.value = chip.dataset.fill;
+      // Fill with exactly the chip's visible text — what you tap is what you get.
+      helperPrompt.value = chip.textContent.trim();
       helperPrompt.focus();
     });
   }
