@@ -150,6 +150,11 @@ const GameSnake = {
 
     draw();
     const intervalId = setInterval(step, 170);
-    return intervalId;
+    // Teardown: stop the loop and detach the document-level key listener so it
+    // doesn't linger (and stack up) when the player leaves before winning.
+    return function teardown() {
+      clearInterval(intervalId);
+      document.removeEventListener("keydown", handleKey);
+    };
   },
 };

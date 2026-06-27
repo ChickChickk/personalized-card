@@ -293,8 +293,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function stopActiveGame() {
     if (!state.activeLoopId) return;
-    cancelAnimationFrame(state.activeLoopId);
-    clearInterval(state.activeLoopId);
+    // A game may return a teardown function (cancels its own timers and
+    // removes its own event listeners) or a raw timer/frame id.
+    if (typeof state.activeLoopId === "function") {
+      state.activeLoopId();
+    } else {
+      cancelAnimationFrame(state.activeLoopId);
+      clearInterval(state.activeLoopId);
+    }
     state.activeLoopId = null;
   }
 
@@ -501,11 +507,8 @@ document.addEventListener("DOMContentLoaded", () => {
       showSuccessView();
       return;
     }
-    // Legacy/standalone preview link → leave or fall back to the builder.
-    window.close();
-    setTimeout(() => {
-      window.location.href = window.location.origin + window.location.pathname;
-    }, 150);
+    // Recipient via a share link → go back, or fall back to a fresh builder.
+    goBackOrHome();
   });
 
   document.getElementById("btn-letter-back").addEventListener("click", () => {
@@ -514,12 +517,18 @@ document.addEventListener("DOMContentLoaded", () => {
       showSuccessView();
       return;
     }
-    window.close();
-    // Fallback if window.close() is blocked by the browser
-    setTimeout(() => {
-      window.location.href = window.location.origin + window.location.pathname;
-    }, 150);
+    goBackOrHome();
   });
+
+  // Browsers block window.close() on tabs the script didn't open, so prefer the
+  // history back-step; if there's no history to return to, land on the builder.
+  function goBackOrHome() {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = window.location.origin + window.location.pathname;
+    }
+  }
 
   // ── Init ─────────────────────────────────────────────────────
 
