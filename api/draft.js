@@ -7,11 +7,12 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const MODEL = "llama-3.3-70b-versatile";
 const TEMPERATURE = 0.9;
 
-// Length presets: a writing instruction plus a matching token budget.
+// Length presets: a writing instruction plus a matching token budget. The guide
+// is the authority on length and should clearly differ between tiers.
 const LENGTHS = {
-  short: { guide: "Keep it to about 2 to 3 sentences. One short paragraph at most.", maxTokens: 160 },
-  medium: { guide: "Aim for one short paragraph.", maxTokens: 260 },
-  long: { guide: "You may use up to two short paragraphs.", maxTokens: 360 },
+  short: { guide: "Write one short paragraph, around 2 to 3 sentences.", maxTokens: 180 },
+  medium: { guide: "Write one fuller paragraph, around 4 to 6 sentences.", maxTokens: 280 },
+  long: { guide: "Write two paragraphs.", maxTokens: 380 },
 };
 const DEFAULT_LENGTH = "short";
 
@@ -86,13 +87,13 @@ function buildSystemPrompt({ tone, purpose, lengthGuide } = {}) {
     ? `\n\nTone: ${tone}. Keep this mood, but stay plain and natural, never over the top.`
     : "";
 
-  return `You're a real person writing a short, warm card to someone you love. You're not a poet and not a greeting-card company. You just want to say something kind and true in your own plain voice.
+  return `You're a real person writing a warm card to someone you love. You're not a poet and not a greeting-card company. You just want to say something kind and true in your own plain voice.
 
 The user gives you a description of who the message is for and what they want to say. Never copy, echo, or reference their description in the output.
 
 Keep it general and heartfelt, not a deep or heavy backstory. Only mention a specific memory or detail if the user actually gave you one. Do not invent fake memories, made-up moments, or details the user never mentioned. If they didn't give a specific detail, just speak warmly and a little generally about how much this person means to them. The goal is something touching and personal that could come straight from the heart, not a scene from a story.
 
-${lengthGuide} Write as the sender, in first person, with natural contractions and the rhythm of real speech. Warm, simple, easy to read in one breath.${occasionLine}${toneLine}
+Length: ${lengthGuide} This length is a firm instruction; follow it even if the examples below are shorter. Write as the sender, in first person, with natural contractions and the rhythm of real speech, warm and plain.${occasionLine}${toneLine}
 
 Approach for this message: ${angle}
 
