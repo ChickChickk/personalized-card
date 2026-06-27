@@ -230,6 +230,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (previewGamePill) previewGamePill.textContent = selectedGame.title;
       if (prevLockMode) prevLockMode.textContent = selectedGame.title;
     }
+
+    scheduleFit();
   }
 
   // Sender-only screen shown right after a card is created: surfaces the share
@@ -621,6 +623,51 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ── Init ─────────────────────────────────────────────────────
+
+  // ── Adaptive fit ─────────────────────────────────────────────
+  // Scale the builder so it always fits the viewport without scrolling, on any
+  // screen. We measure the builder's natural height (at scale 1) and shrink only
+  // as much as needed. This replaces the old hardcoded height media-query tiers.
+  const docEl = document.documentElement;
+  let fitScheduled = false;
+
+  function fitBuilder() {
+    // Only the builder is auto-fit; other views keep their own scroll layout.
+    // Below the desktop breakpoint we let the page scroll naturally.
+    if (viewBuilder.classList.contains("hidden") || window.innerWidth < 1024) {
+      docEl.style.setProperty("--desktop-scale", "1");
+      return;
+    }
+    // Reset to 1, then read scrollHeight — the read forces a synchronous layout,
+    // so we measure the true natural height before the browser paints.
+    docEl.style.setProperty("--desktop-scale", "1");
+    const natural = viewBuilder.scrollHeight;
+    // Hold back room for the body's vertical padding, the fixed footer, and a
+    // small safety margin so the Create button never sits flush against the edge.
+    const RESERVED = 100;
+    const available = window.innerHeight - RESERVED;
+    const scale = Math.max(0.6, Math.min(1, available / natural));
+    docEl.style.setProperty("--desktop-scale", scale.toFixed(3));
+  }
+
+  // Coalesce bursts of triggers (resize, observer, fonts) into one fit per frame.
+  function scheduleFit() {
+    if (fitScheduled) return;
+    fitScheduled = true;
+    requestAnimationFrame(() => {
+      fitScheduled = false;
+      fitBuilder();
+    });
+  }
+
+  window.addEventListener("resize", scheduleFit);
+  if (window.ResizeObserver) {
+    new ResizeObserver(scheduleFit).observe(viewBuilder);
+  }
+  // Web fonts change text height once loaded; refit when they're ready.
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(scheduleFit);
+  }
 
   async function initApp() {
     const params = new URLSearchParams(window.location.search);
