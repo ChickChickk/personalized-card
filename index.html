@@ -12,8 +12,8 @@
   </head>
   <body>
     <div class="app-container">
-      <main id="builder-view" class="workspace-layout hidden">
-        <section class="creation-studio">
+      <div id="builder-view" class="workspace-layout">
+        <div id="creation-studio">
           <header class="hero-section">
             <span class="eyebrow">Generation Studio</span>
             <h1>Special for your loved ones💌</h1>
@@ -86,12 +86,109 @@
                     id="helper-prompt"
                     placeholder="What do you want to say? AI will help you write it✨"
                   />
+                  <div
+                    class="segmented"
+                    id="length-row"
+                    role="group"
+                    aria-label="Message length"
+                  >
+                    <button
+                      type="button"
+                      class="seg is-active"
+                      data-length="short"
+                    >
+                      Short
+                    </button>
+                    <button type="button" class="seg" data-length="medium">
+                      Medium
+                    </button>
+                    <button type="button" class="seg" data-length="long">
+                      Long
+                    </button>
+                  </div>
                   <button
                     type="button"
                     id="btn-magic-draft"
                     class="btn-secondary"
                   >
                     Generate ✨
+                  </button>
+                </div>
+
+                <div
+                  class="idea-slider"
+                  id="idea-slider"
+                  aria-label="Idea suggestions"
+                >
+                  <button
+                    type="button"
+                    class="chip chip-idea"
+                    data-fill="my best friend's birthday"
+                  >
+                    best friend's birthday
+                  </button>
+                  <button
+                    type="button"
+                    class="chip chip-idea"
+                    data-fill="thank my mom for always being there"
+                  >
+                    thank my mom
+                  </button>
+                  <button
+                    type="button"
+                    class="chip chip-idea"
+                    data-fill="say sorry for missing dinner"
+                  >
+                    say sorry
+                  </button>
+                  <button
+                    type="button"
+                    class="chip chip-idea"
+                    data-fill="tell my partner I miss them"
+                  >
+                    miss you
+                  </button>
+                  <button
+                    type="button"
+                    class="chip chip-idea"
+                    data-fill="congrats on the new job"
+                  >
+                    congrats
+                  </button>
+                  <button
+                    type="button"
+                    class="chip chip-idea"
+                    data-fill="just thinking of you today"
+                  >
+                    thinking of you
+                  </button>
+                  <button
+                    type="button"
+                    class="chip chip-idea"
+                    data-fill="happy anniversary to my love"
+                  >
+                    anniversary
+                  </button>
+                  <button
+                    type="button"
+                    class="chip chip-idea"
+                    data-fill="good luck on your big day"
+                  >
+                    good luck
+                  </button>
+                  <button
+                    type="button"
+                    class="chip chip-idea"
+                    data-fill="welcome to the world little one"
+                  >
+                    new baby
+                  </button>
+                  <button
+                    type="button"
+                    class="chip chip-idea"
+                    data-fill="get well soon, I'm rooting for you"
+                  >
+                    get well soon
                   </button>
                 </div>
               </div>
@@ -113,7 +210,7 @@
               </button>
             </div>
           </form>
-        </section>
+        </div>
 
         <section class="preview-studio">
           <div class="preview-sticky-wrap">
@@ -143,7 +240,7 @@
             </div>
           </div>
         </section>
-      </main>
+      </div>
 
       <section id="success-view" class="runtime-screen hidden">
         <div class="runtime-card-panel">
@@ -176,16 +273,52 @@
           <p class="share-note">Anyone with this link can open the card.</p>
 
           <div class="success-actions">
-            <button type="button" id="btn-preview-recipient" class="btn-secondary">
-              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>
+            <button
+              type="button"
+              id="btn-preview-recipient"
+              class="btn-secondary"
+            >
+              <svg
+                class="btn-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M8 5l11 7-11 7z" />
+              </svg>
               Preview as recipient
             </button>
             <button type="button" id="btn-see-message" class="btn-secondary">
-              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+              <svg
+                class="btn-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <path d="M3 7l9 6 9-6" />
+              </svg>
               See the message
             </button>
             <button type="button" id="btn-create-another" class="btn-secondary">
-              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              <svg
+                class="btn-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
               Create another card
             </button>
           </div>
