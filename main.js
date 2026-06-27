@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     activeLoopId: null,
     mode: "builder",
     currentCode: null,
+    length: "short",
   };
 
   const viewBuilder = document.getElementById("builder-view");
@@ -51,11 +52,11 @@ document.addEventListener("DOMContentLoaded", () => {
   async function saveCard(cardData) {
     const res = await fetch(`${API_BASE}/api/cards`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {"Content-Type": "application/json"},
       body: JSON.stringify(cardData),
     });
     if (!res.ok) throw new Error("Failed to save card");
-    const { code } = await res.json();
+    const {code} = await res.json();
     return code;
   }
 
@@ -68,11 +69,14 @@ document.addEventListener("DOMContentLoaded", () => {
   async function generateDraft(prompt) {
     const res = await fetch(`${API_BASE}/api/draft`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt }),
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        prompt,
+        length: state.length,
+      }),
     });
     if (!res.ok) throw new Error("Draft generation failed");
-    const { message } = await res.json();
+    const {message} = await res.json();
     return message;
   }
 
@@ -167,16 +171,19 @@ document.addEventListener("DOMContentLoaded", () => {
   function validateCardData() {
     const errors = [];
     if (!inputTo.value.trim()) errors.push("Please enter who the card is for.");
-    if (!inputFrom.value.trim()) errors.push("Please enter who the card is from.");
-    if (!inputMessage.value.trim()) errors.push("Please write a message or generate a draft first.");
-    if (!state.selectedGame || !GAME_REGISTRY[state.selectedGame]) errors.push("Please choose one mini game.");
+    if (!inputFrom.value.trim())
+      errors.push("Please enter who the card is from.");
+    if (!inputMessage.value.trim())
+      errors.push("Please write a message or generate a draft first.");
+    if (!state.selectedGame || !GAME_REGISTRY[state.selectedGame])
+      errors.push("Please choose one mini game.");
     return errors;
   }
 
   function showFormErrors(errors) {
     formErrors.innerHTML = errors.map((e) => `<span>${e}</span>`).join("");
     formErrors.classList.remove("hidden");
-    formErrors.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    formErrors.scrollIntoView({behavior: "smooth", block: "nearest"});
   }
 
   function clearFormErrors() {
@@ -205,7 +212,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function startBuilderMode() {
     state.mode = "builder";
     document.body.classList.add("mode-builder");
-    document.body.classList.remove("mode-card", "mode-shared-link", "mode-creator-preview");
+    document.body.classList.remove(
+      "mode-card",
+      "mode-shared-link",
+      "mode-creator-preview",
+    );
 
     hideAllViews();
     viewBuilder.classList.remove("hidden");
@@ -306,9 +317,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── Event listeners ──────────────────────────────────────────
 
-  inputTo.addEventListener("input", () => { syncPreview(); clearFormErrors(); });
-  inputFrom.addEventListener("input", () => { syncPreview(); clearFormErrors(); });
-  inputMessage.addEventListener("input", () => { syncPreview(); clearFormErrors(); });
+  inputTo.addEventListener("input", () => {
+    syncPreview();
+    clearFormErrors();
+  });
+  inputFrom.addEventListener("input", () => {
+    syncPreview();
+    clearFormErrors();
+  });
+  inputMessage.addEventListener("input", () => {
+    syncPreview();
+    clearFormErrors();
+  });
 
   btnMagicDraft.addEventListener("click", async () => {
     const prompt = helperPrompt.value.trim();
@@ -333,11 +353,12 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Draft generation failed:", err);
       // Fall back to a random template helper if API fails
       const keys = Object.keys(HELPER_REGISTRY);
-      const fallback = HELPER_REGISTRY[keys[Math.floor(Math.random() * keys.length)]];
+      const fallback =
+        HELPER_REGISTRY[keys[Math.floor(Math.random() * keys.length)]];
       if (fallback) {
         inputMessage.value = fallback.generate(
           inputTo.value.trim() || "someone special",
-          ""
+          "",
         );
         syncPreview();
       }
@@ -348,6 +369,59 @@ document.addEventListener("DOMContentLoaded", () => {
       btnMagicDraft.disabled = false;
     }
   });
+
+  // ── Helper controls: length toggle + idea conveyor belt ──
+
+  // Length segmented control (always has exactly one active option).
+  const lengthRow = document.getElementById("length-row");
+  if (lengthRow) {
+    lengthRow.addEventListener("click", (e) => {
+      const seg = e.target.closest(".seg");
+      if (!seg) return;
+      lengthRow
+        .querySelectorAll(".seg")
+        .forEach((s) => s.classList.remove("is-active"));
+      seg.classList.add("is-active");
+      state.length = seg.dataset.length;
+    });
+  }
+
+  // Idea slider: drag to scroll sideways with the mouse, tap a chip to fill the
+  // prompt box. A tap that turns into a drag should scroll, not fill the box.
+  const ideaSlider = document.getElementById("idea-slider");
+  if (ideaSlider) {
+    let isDown = false;
+    let dragged = false;
+    let startX = 0;
+    let startScroll = 0;
+
+    ideaSlider.addEventListener("pointerdown", (e) => {
+      isDown = true;
+      dragged = false;
+      startX = e.clientX;
+      startScroll = ideaSlider.scrollLeft;
+    });
+    ideaSlider.addEventListener("pointermove", (e) => {
+      if (!isDown) return;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 4) dragged = true;
+      ideaSlider.scrollLeft = startScroll - dx;
+      if (dragged) ideaSlider.classList.add("is-dragging");
+    });
+    const endDrag = () => {
+      isDown = false;
+      ideaSlider.classList.remove("is-dragging");
+    };
+    ideaSlider.addEventListener("pointerup", endDrag);
+    ideaSlider.addEventListener("pointerleave", endDrag);
+
+    ideaSlider.addEventListener("click", (e) => {
+      const chip = e.target.closest(".chip-idea");
+      if (!chip || dragged) return;
+      helperPrompt.value = chip.dataset.fill;
+      helperPrompt.focus();
+    });
+  }
 
   formCreation.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -376,7 +450,14 @@ document.addEventListener("DOMContentLoaded", () => {
     loadingMsg.textContent = messages[0];
     overlay.classList.remove("hidden", "fade-out");
 
-    const confettiColors = ["#e76f51", "#f4a26a", "#f7c59f", "#ffffff", "#f4d03f", "#e8a0bf"];
+    const confettiColors = [
+      "#e76f51",
+      "#f4a26a",
+      "#f7c59f",
+      "#ffffff",
+      "#f4d03f",
+      "#e8a0bf",
+    ];
     const confettiPieces = [];
     for (let i = 0; i < 40; i++) {
       const piece = document.createElement("div");
@@ -450,16 +531,20 @@ document.addEventListener("DOMContentLoaded", () => {
           document.body.removeChild(tempInput);
         }
         if (shareNote) {
-          shareNote.textContent = "Link copied ✓ Anyone with this link can open the card.";
+          shareNote.textContent =
+            "Link copied ✓ Anyone with this link can open the card.";
           shareNote.classList.add("is-copied");
         }
         if (btnCopyLink) {
           btnCopyLink.textContent = "Copied ✓";
-          setTimeout(() => { btnCopyLink.textContent = "Copy 🔗"; }, 1600);
+          setTimeout(() => {
+            btnCopyLink.textContent = "Copy 🔗";
+          }, 1600);
         }
       } catch {
         if (shareNote) {
-          shareNote.textContent = "Copy failed. You can manually copy the URL from the address bar.";
+          shareNote.textContent =
+            "Copy failed. You can manually copy the URL from the address bar.";
           shareNote.classList.remove("is-copied");
         }
       }
@@ -485,7 +570,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Success screen → start a fresh card.
   if (btnCreateAnother) {
     btnCreateAnother.addEventListener("click", () => {
-      history.pushState(null, "", window.location.origin + window.location.pathname);
+      history.pushState(
+        null,
+        "",
+        window.location.origin + window.location.pathname,
+      );
       state.createdInPlace = false;
       state.currentCode = null;
       inputTo.value = "";
@@ -497,7 +586,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.getElementById("font-slider").addEventListener("input", (e) => {
-    document.getElementById("final-message").style.fontSize = e.target.value / 100 + "rem";
+    document.getElementById("final-message").style.fontSize =
+      e.target.value / 100 + "rem";
   });
 
   document.getElementById("btn-game-back").addEventListener("click", () => {
