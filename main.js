@@ -125,6 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
         state.selectedGame === game.id ? "is-selected" : ""
       }`;
       card.setAttribute("data-game-id", game.id);
+      card.tabIndex = 0;
 
       card.innerHTML = `
         <div class="card-identity-header">
@@ -135,6 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
 
       card.addEventListener("click", () => {
+        card.focus();
         state.selectedGame = game.id;
         document
           .querySelectorAll(".game-mode-card")
@@ -143,6 +145,17 @@ document.addEventListener("DOMContentLoaded", () => {
         if (previewGamePill) previewGamePill.textContent = game.title;
         if (prevLockMode) prevLockMode.textContent = game.title;
         renderGameThumbnail(game.id);
+      });
+
+      // Enter on a chosen game creates the card; Space selects it.
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          formCreation.requestSubmit();
+        } else if (event.key === " " || event.key === "Spacebar") {
+          event.preventDefault();
+          card.click();
+        }
       });
 
       gameCardsContainer.appendChild(card);
@@ -332,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
     clearFormErrors();
   });
 
-  btnMagicDraft.addEventListener("click", async () => {
+  async function runMagicDraft() {
     const prompt = helperPrompt.value.trim();
     if (!prompt) {
       helperPrompt.focus();
@@ -369,6 +382,18 @@ document.addEventListener("DOMContentLoaded", () => {
       heartbeatOverlay.classList.add("hidden");
       btnMagicDraft.textContent = "Generate ✨";
       btnMagicDraft.disabled = false;
+      // Keep focus in the prompt so Enter can re-generate.
+      helperPrompt.focus();
+    }
+  }
+
+  btnMagicDraft.addEventListener("click", runMagicDraft);
+
+  // Enter inside the prompt box means "Generate", not "Create card".
+  helperPrompt.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      runMagicDraft();
     }
   });
 
@@ -385,6 +410,8 @@ document.addEventListener("DOMContentLoaded", () => {
         .forEach((s) => s.classList.remove("is-active"));
       seg.classList.add("is-active");
       state.length = seg.dataset.length;
+      // Return focus to the prompt so Enter still triggers Generate.
+      helperPrompt.focus();
     });
   }
 
