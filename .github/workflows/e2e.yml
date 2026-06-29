@@ -7,6 +7,7 @@ name: E2E (post-deploy smoke test)
 # usage and test-card churn down.
 on:
   deployment_status: {}
+  workflow_dispatch: {} # allows manual runs from the Actions tab
 
 # If several production deploys land quickly, only smoke-test the newest.
 concurrency:
@@ -16,8 +17,9 @@ concurrency:
 jobs:
   e2e:
     if: >
-      github.event.deployment_status.state == 'success' &&
-      github.event.deployment_status.environment == 'Production'
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+       github.event.deployment_status.environment == 'Production')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,8 +37,12 @@ jobs:
 
       - name: Run E2E against the live deployment
         env:
-          # The exact URL Vercel just deployed, so we test the right commit.
-          E2E_BASE_URL: ${{ github.event.deployment_status.target_url }}
+          # Use the public production alias, not deployment_status.target_url:
+          # the latter is the deployment-specific URL that sits behind Vercel
+          # Deployment Protection (auth), so Playwright would hit a login page.
+          # This alias is repointed to the new build as part of the successful
+          # production deploy that triggered us, so it still tests this commit.
+          E2E_BASE_URL: https://personalized-card-steel.vercel.app
         run: npx playwright test
 
       - name: Upload Playwright report
