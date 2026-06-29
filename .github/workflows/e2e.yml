@@ -6,8 +6,8 @@ name: E2E (post-deploy smoke test)
 # race against Vercel's build — and only for main/production, keeping Groq
 # usage and test-card churn down.
 on:
-  deployment_status: {}
-  workflow_dispatch: {} # allows manual runs from the Actions tab
+  deployment_status: # fires after Vercel reports a deploy status
+  workflow_dispatch: # allows manual runs from the Actions tab
 
 # If several production deploys land quickly, only smoke-test the newest.
 concurrency:

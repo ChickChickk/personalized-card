@@ -9,7 +9,10 @@ const baseURL =
 
 module.exports = defineConfig({
   testDir: "./e2e",
-  timeout: 60_000,
+  // Generous per-test budget: the default slowMo below paces every click, so
+  // the full pipeline (draft → create → play → reveal, twice per game) needs
+  // more headroom than a full-speed run.
+  timeout: 120_000,
   fullyParallel: false,
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
@@ -18,11 +21,15 @@ module.exports = defineConfig({
     video: "on",
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
-    // Slow each action by E2E_SLOWMO ms so the demo video is easy to follow.
-    // Defaults to 0 (full speed) for everyday/CI runs; `npm run e2e:demo`
-    // sets it higher.
+    // Slow each Playwright action by E2E_SLOWMO ms so clicks are easy to
+    // follow in the recorded video. Defaults to 150ms every run (CI included);
+    // set E2E_SLOWMO=0 for a fast run, or `npm run e2e:demo` for an even
+    // slower, headed walkthrough.
     launchOptions: {
-      slowMo: Number(process.env.E2E_SLOWMO || 0),
+      slowMo:
+        process.env.E2E_SLOWMO !== undefined
+          ? Number(process.env.E2E_SLOWMO)
+          : 150,
     },
   },
   projects: [
