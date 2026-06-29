@@ -1,0 +1,48 @@
+name: E2E (post-deploy smoke test)
+
+# Runs the Playwright suite against the live site, but only after Vercel
+# reports a successful *production* deploy. Triggering on deployment_status
+# (instead of push) means we test the commit that actually went live — no
+# race against Vercel's build — and only for main/production, keeping Groq
+# usage and test-card churn down.
+on:
+  deployment_status: {}
+
+# If several production deploys land quickly, only smoke-test the newest.
+concurrency:
+  group: e2e-prod
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    if: >
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment_status.environment == 'Production'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E against the live deployment
+        env:
+          # The exact URL Vercel just deployed, so we test the right commit.
+          E2E_BASE_URL: ${{ github.event.deployment_status.target_url }}
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
