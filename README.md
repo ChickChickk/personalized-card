@@ -59,9 +59,9 @@ POST /api/cards  (Vercel serverless function)
        ▼
 POST /api/draft  (Vercel serverless function)
        │
-       ├─ Receives: to, tone, detail
-       ├─ Builds a prompt string
-       └─ Sends to Groq API (llama-3.1-8b-instant model)
+       ├─ Receives: prompt, tone, purpose, length
+       ├─ Builds a system prompt (style examples, tone, length, anti-cliché rules)
+       └─ Sends to Groq API (llama-3.3-70b-versatile model)
               │
               ▼
        [AI returns message text]
@@ -88,7 +88,8 @@ POST /api/draft  (Vercel serverless function)
 │   ├── cards.js            — POST /api/cards — saves a new card
 │   ├── cards/[code].js     — GET /api/cards/:code — fetches a card by code
 │   ├── draft.js            — POST /api/draft — AI message generation via Groq
-│   └── health.js           — GET /api/health — uptime check
+│   ├── health.js           — GET /api/health — uptime check
+│   └── keepalive.js        — GET /api/keepalive — DB ping that keeps Supabase awake
 │
 ├── games/
 │   ├── gameRegistry.js     — Maps game IDs to their modules
@@ -108,6 +109,36 @@ POST /api/draft  (Vercel serverless function)
     ├── helperAnniversary.js — "Anniversary" tone templates
     └── helperApology.js    — "Apology" tone templates
 ```
+
+---
+
+## Testing & automation
+
+**Unit tests** (Jest) — cover the card API logic in `tests/`:
+
+```bash
+npm test
+```
+
+**End-to-end tests** (Playwright) — drive the full pipeline (fill form → AI draft → create card → play game → reveal letter) for **all six games**, then verify the share link works for a fresh recipient. Every run records a video.
+
+```bash
+npm run e2e          # headless, runs against production by default
+npm run e2e:demo     # slow, headed walkthrough
+```
+
+| Env var | Purpose |
+|---|---|
+| `E2E_BASE_URL` | Target site (defaults to the live production URL) |
+| `E2E_SLOWMO` | ms delay before each action (default 150; set `0` for full speed) |
+| `E2E_PAUSE` | ms to hold at each milestone, for clearer demo videos |
+
+**GitHub Actions** (`.github/workflows/`)
+
+| Workflow | Trigger | What it does |
+|---|---|---|
+| `keepalive.yml` | Daily (cron) | Pings `/api/keepalive` so the free-tier Supabase project isn't auto-paused for inactivity |
+| `e2e.yml` | After each successful production deploy | Runs the Playwright suite against the live site and uploads the report/videos |
 
 ---
 
