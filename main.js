@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const helperPrompt = document.getElementById("helper-prompt");
   const thumbnailContainer = document.getElementById("preview-game-thumbnail");
   const btnCopyLink = document.getElementById("btn-copy-link");
+  const copyLinkLabel = document.getElementById("copy-link-label");
   const shareNote = document.querySelector(".share-note");
   const shareLinkInput = document.getElementById("share-link-input");
   const btnPreviewRecipient = document.getElementById("btn-preview-recipient");
@@ -129,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       card.innerHTML = `
         <div class="card-identity-header">
-          <span>${game.emoji}</span>
+          <span class="game-card-icon">${game.thumbnail ? game.thumbnail() : game.emoji}</span>
           <div class="game-card-title">${game.title}</div>
         </div>
         <div class="game-card-desc">${game.description}</div>
@@ -269,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
       shareNote.textContent = "Anyone with this link can open the card.";
       shareNote.classList.remove("is-copied");
     }
-    if (btnCopyLink) btnCopyLink.textContent = "Copy 🔗";
+    if (copyLinkLabel) copyLinkLabel.textContent = "Copy";
   }
 
   function startCardMode(cardData, isCreatorPreview = false) {
@@ -380,7 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } finally {
       composerCore.classList.remove("generating");
       heartbeatOverlay.classList.add("hidden");
-      btnMagicDraft.textContent = "Generate ✨";
+      btnMagicDraft.textContent = "Generate";
       btnMagicDraft.disabled = false;
       // Keep focus in the prompt so Enter can re-generate.
       helperPrompt.focus();
@@ -523,7 +524,7 @@ document.addEventListener("DOMContentLoaded", () => {
       state.currentCode = code;
 
       clearInterval(msgInterval);
-      loadingMsg.textContent = "Your card is ready! 🎉";
+      loadingMsg.textContent = "Your card is ready!";
 
       state.createdInPlace = true;
       showSuccessView();
@@ -565,10 +566,10 @@ document.addEventListener("DOMContentLoaded", () => {
             "Link copied ✓ Anyone with this link can open the card.";
           shareNote.classList.add("is-copied");
         }
-        if (btnCopyLink) {
-          btnCopyLink.textContent = "Copied ✓";
+        if (copyLinkLabel) {
+          copyLinkLabel.textContent = "Copied ✓";
           setTimeout(() => {
-            btnCopyLink.textContent = "Copy 🔗";
+            copyLinkLabel.textContent = "Copy";
           }, 1600);
         }
       } catch {
