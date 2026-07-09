@@ -10,6 +10,7 @@ Thumbs.db
 # Editor folders
 .vscode/
 .idea/
+.claude/
 
 # Logs
 *.log
